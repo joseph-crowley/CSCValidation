@@ -1,0 +1,25 @@
+universe=vanilla
+executable              = job_duties.sh
+arguments               = {CMSSWVERSION} {SCRAMARCH} {TARFILE} {CONDORSITE} {CONDOROUTDIR} {RUNEXE} {RUNEXEARGS}
+Initialdir              = {outDir}
+output                  = job.$(ClusterId).$(ProcId).out
+error                   = job.$(ClusterId).$(ProcId).err
+log                     = job.$(ClusterId).$(ProcId).log
+# request_memory        =  #TODO
++JobFlavour             = "tomorrow"
+x509userproxy           = {home}/x509up_u{uid}
+#https://www-auth.cs.wisc.edu/lists/htcondor-users/2010-September/msg00009.shtml
+periodic_remove         = JobStatus == 5
+transfer_executable=True
+transfer_input_files    = # TODO
+transfer_output_files = # TODO
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT_OR_EVICT
++Owner = {user}
++project_Name = "cscvalidation"
+notification=Never
+Requirements = (HAS_SINGULARITY=?=True)
++SingularityImage = "/cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel7"
+
+
+queue
