@@ -1,6 +1,8 @@
 ##########################################################################################
 # Condor Job Submission Script for CSCValidation 
 #
+# anywhere with a REPLACETAG needs to be filled using python
+#
 # Authors
 #   Joe Crowley, UC Santa Barbara
 ##########################################################################################
@@ -14,17 +16,16 @@ Requirements            = (HAS_SINGULARITY=?=True)
 
 # job executes with these parameters
 executable              = job_duties.sh
-arguments               = "CMSSWVERSION SCRAMARCH INFILES CONDORSITE CONDOROUTDIR HOME USER UID"
+arguments               = "CMSSWVERSION SCRAMARCH JOBTAG USER"
 
 # job runs here and produces these files
-Initialdir              = $CONDOROUTDIR
+Initialdir              = CONDOROUTDIR_REPLACETAG
 output                  = job.$(ClusterId).$(ProcId).out
 error                   = job.$(ClusterId).$(ProcId).err
 log                     = job.$(ClusterId).$(ProcId).log
 
 # job needs a voms proxy for file access
-x509userproxy           = $HOME/x509up_u$UID
-# request_memory        =  #TODO
+x509userproxy           = HOME_REPLACETAG/x509up_uUID_REPLACETAG
 
 # job has to be cleaned up when it fails
 #      - see https://www-auth.cs.wisc.edu/lists/htcondor-users/2010-September/msg00009.shtml
@@ -33,15 +34,14 @@ periodic_remove         = JobStatus == 5
 # make sure that everything is where it needs to be
 transfer_executable     = True 
 should_transfer_files   = Yes
-transfer_input_files    = $VALIDATIONSCRIPT, # TODO
-transfer_output_files   = # TODO
+transfer_input_files    = validation_cfg.py,copyFromCondorToSite.sh
+transfer_output_files   = # intentionally left blank
 when_to_transfer_output = ON_EXIT_OR_EVICT
 
 # configure label parameters for the job
 +JobFlavour             = "tomorrow"
-+Owner = USER
-+project_Name = "cscvalidation"
-notification=Never
++project_Name           = "cscvalidation"
+notification            = Never
 
 # add the job to the queue
 queue

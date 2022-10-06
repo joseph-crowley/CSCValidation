@@ -95,7 +95,7 @@ def merge_outputs(config):
             continue
 
         rundir = 'run_%s' % run
-        python_mkdir(rundir)
+        os.mkdirs(rundir)
         os.chdir(rundir)
 
         tpeOut = 'TPEHists.root'
@@ -301,210 +301,35 @@ def run_validation(config):
     [stream, eventContent] = get_from_dataset(dataset) 
 
     # Create working directory for specific run number
-    rundir = 'run_%s' % run
-    python_mkdir(rundir)
+    basedir = '$CMSSW_BASE/src/CSCValidation'
+    rundir = basedir+'/Outputs/tasks/{}/run_{}'.format(stream, run)
+    os.mkdirs(rundir + "/Logs")
     os.chdir(rundir)
+    os.system('ln -sf '+basedir+'/scripts/copyFromCondorToSite.sh {}/'.format(rundir))
+    os.system('cp -f '+basedir+'/python/validation_cfg.py {}/'.format(rundir))
 
-    # Use appropriate cfg files in Templates directory for
-    # first, running the validation to get CSC DQM & EMTF plots and
-    # second, merging the resultant files to create plots, and push them to the EOS website
-    if "GEN" in eventContent: eventContent = "RAW"
-    paramMap = {
-        'RECO' : {
-            'digis': False,
-            'standalone': True,
-        },
-        'FEVT' : {
-            'digis': True,
-            'standalone': True,
-        },
-        'RAW' : {
-            'digis': True,
-            'standalone': False,
-        },
-    }
-    # TODO: eventually add options for custom configs
-    if paramMap[eventContent]['digis']:
-        cfg  = 'cfg_yesDigis_%s_template' % eventContent
-        crab = 'crab_yesDigis_%s_template' % eventContent
-        proc = 'secondStep_yesDigis_template'
-        if eventContent=='FEVT' and 'HI' in dataset: cfg += '_HI'
-    else:
-        cfg  = 'cfg_noDigis_%s_template' % eventContent
-        crab = 'crab_noDigis_%s_template' % eventContent
-        proc = 'secondStep_noDigis_template'
+    # currently only support RAW eventContent
+    if eventContent != 'RAW':
+        print('Validation failed. Only eventContent currently supported is RAW')
+        return 
 
-    print( "Will run with options --- \nDigis: %r \nStandalone: %r" % (paramMap[eventContent]['digis'], paramMap[eventContent]['standalone']))
-    print("\nUsing the following cfg template files --- \ncfg: "+cfg+"\ncrab: "+crab+"\nproc: "+proc)
+    # replace template parameters in validation_cfg
+    with open(basedir+'/python/validation_cfg.py','r') as f:
+        validation_cfg = f.read()
 
-    templatecfgFilePath = '%s/%s' %(TEMPLATE_PATH, cfg)
-    templatecrabFilePath = '%s/%s' % (TEMPLATE_PATH, crab)
-    templateHTMLFilePath = '%s/html_template' % TEMPLATE_PATH
-    templateRootMacroPath = '%s/makePlots.C' % TEMPLATE_PATH
-    templateGraphMacroPath = '%s/makeGraphs.C' % TEMPLATE_PATH
-    templateSecondStepPath = '%s/%s' % (TEMPLATE_PATH, proc)
+    validation_cfg = validation_cfg.replace('CONDOROUTDIR_REPLACETAG',rundir)
 
-    # old HTML stuff, kept for backwards compatibility
-    cfgFileName='validation_%s_cfg.py' % run
-    crabFileName='crab_%s_cfg.py' % run
-    htmlFileName = "Summary.html"
-    macroFileName = {}
-    macroFileName['All'] = "makePlots.C"
-    macroFileName['Graph'] = "makeGraphs.C"
-    for trigger in triggers:
-        macroFileName[trigger] = "%s_makePlots.C" % trigger
-    procFileName = "secondStep.py"
-    outFilePrefix='valHists_run%s_%s' % (run, stream)
-    outFileName='%s.root' % (outFilePrefix)
-    outputPath = '%s/%s/run%s_%s' % (CONDOR_PATH, stream, run, eventContent) #GM
-    Time=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
+    with open(rundir+'/validation_cfg.py','w') as f:
+        f.write(validation_cfg)
 
-    symbol_map_html = { 'RUNNUMBER':run, 'NEVENT':num, "DATASET":dataset, "CMSSWVERSION":Release, "GLOBALTAG":globalTag, "DATE":Time }
-    symbol_map_macro = {}
-    symbol_map_macro['All'] = { 'FILENAME':outFileName, 'TEMPLATEDIR':TEMPLATE_PATH }
-    symbol_map_macro['Graph'] = { 'INPUTDIR':outputPath, 'FILEPREFIX':outFilePrefix, 'TEMPLATEDIR':TEMPLATE_PATH }
-    for trigger in triggers:
-        symbol_map_macro[trigger] = { 'FILENAME':trigger+'_'+outFileName, 'TEMPLATEDIR':TEMPLATE_PATH }
-    symbol_map_proc = { 'TEMPLATEDIR':TEMPLATE_PATH, 'OUTPUTFILE':outFileName, 'RUNNUMBER':run, 'NEWDIR':rundir, 'CFGFILE':cfgFileName, 'STREAM':stream }
-    symbol_map_cfg = { 'NEVENT':num, 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run}
-    symbol_map_crab = { 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run, 'STREAM':stream, 'EVENTCONTENT':eventContent}
+    # replace template parameters in job.sub
+    with open(basedir+'/scripts/job.sub','r') as f:
+        job_sub = f.read()
 
-    trigger_cfg = []
-    trigger_proc = []
-    for trigger in triggers:
-        trigger_cfg += ["process.triggerSelection%s = process.triggerSelection.clone(triggerConditions=cms.vstring('%s'))\n" %(trigger, trigger)]
-        trigger_cfg += ["process.cscValidation%s = process.cscValidation.clone(rootFileName=cms.untracked.string('%s_OUTFILE'))\n" % (trigger, trigger)]
-        trigger_cfg += ["process.p%s = cms.Path(process.gtDigis * process.triggerSelection%s * process.muonCSCDigis * process.csc2DRecHits * process.cscSegments * process.cscValidation%s)\n" % (trigger, trigger, trigger)]
-        trigger_proc += ["print('%s')\n" % trigger]
-        trigger_proc += ['os.system("root -l -q -b %s_makePlots.C")\n' % trigger]
-        trigger_proc += ['os.system("mkdir -p /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/results/runRUNNUMBER/STREAM/Site/PNGS/%s")\n' % trigger ]
-        trigger_proc += ['os.system("cp *.png /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/results/runRUNNUMBER/STREAM/Site/PNGS/%s")\n' % trigger ]
-        trigger_proc += ['os.system("mkdir -p /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS/%s")\n' % trigger ]
-        trigger_proc += ['os.system("mv *.png /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS/%s")\n' % trigger ]
+    job_sub = job_sub.replace('CONDOROUTDIR_REPLACETAG',rundir)
+    job_sub = job_sub.replace('HOME_REPLACETAG',os.path.expanduser("~"))
+    job_sub = job_sub.replace('UID_REPLACETAG',os.getuid())
 
-
-    replace(symbol_map_html,templateHTMLFilePath, htmlFileName)
-    replace(symbol_map_macro['All'],templateRootMacroPath, macroFileName['All'])
-    replace(symbol_map_macro['Graph'],templateGraphMacroPath, macroFileName['Graph'])
-    for trigger in triggers:
-        replace(symbol_map_macro[trigger],templateRootMacroPath, macroFileName[trigger])
-    replace(symbol_map_proc,templateSecondStepPath, procFileName, trigger_proc)
-    replace(symbol_map_cfg,templatecfgFilePath, cfgFileName, trigger_cfg)
-    replace(symbol_map_crab,templatecrabFilePath, crabFileName)
-
-    os.system("chmod 755 secondStep.py")
-
-    jsonStr = 'var runParams = {\n' \
-            + '  "release" : "%s",\n' % Release \
-            + '  "datasetname" : "%s",\n' % dataset \
-            + '  "runnum" : "%s",\n' % run \
-            + '  "events" : "%s",\n' % num \
-            + '  "globaltag" : "%s",\n' % globalTag \
-            + '  "rundate" : "%s",\n' % Time \
-            + '  "triggers" : [\n' \
-            + '    "All"'
-    for trigger in triggers:
-        jsonStr += ',\n    "%s"' % trigger
-    jsonStr += '\n  ]\n}'
-
-    with open('runParams.json','w') as file:
-        file.write(jsonStr)
-
-    # TODO: Move this elsewhere? can this be done with a template? 
-    # create submission files and submit jobs through Condor
-    subprocess.check_call('mkdir -p /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s' % (stream, run, eventContent), shell=True)
-    nf = 1
-    # maxJobNum controls the maximum number of jobs to submit if numJobs is very large
-    print(f"\nMaximum number of batch jobs submitted per run: {maxJobNum}\n")
-    # numJobs is the parameter to decide how many batch jobs to submit for the total number of input files for a run
-    numJobs = int(math.ceil(len(input_files)/float(nf)))
-    # check files already run over
-    fname = 'processedFiles.txt'
-    open(fname, 'a').close()
-    with open(fname, 'r') as file:
-        procFiles = file.readlines()
-    procFiles = [x.rstrip() for x in procFiles]
-
-    for j in range(min(maxJobNum, numJobs)):
-        doJob = force
-        for f in input_files[j*nf:j*nf+nf]:
-            if f not in procFiles:
-                doJob = True
-                if not dryRun:
-                    with open(fname, 'a') as file:
-                        file.write('%s\n'%f)
-
-        if not doJob: continue
-
-        # TODO: check with ulascan how to properly set up the files in the job directory
-
-        # rename the file to unique
-        fn = input_files[j*nf].split('/')[-1].split('.')[0]
-        cfgFileName='validation_%s_%s_cfg.py' % (run, fn)
-        outFileName='valHists_run%s_%s_%s.root' % (run, stream, fn)
-
-        # create the config file
-        fileListString = ''
-        numLumis = 0
-        numEvents = 0
-        for f in input_files[j*nf:j*nf+nf]:
-            if fileListString: fileListString += ',\n'
-            fileListString += "    '%s'" % f
-
-        symbol_map_cfg = { 'NEVENT':num, 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run, 'FILELIST': fileListString, 'VERSION': str(j)}
-        replace(symbol_map_cfg,templatecfgFilePath, cfgFileName, trigger_cfg)
-
-        # create a job execution script
-        sh = open("run_%i.sh" % j, "w")
-        sh.write("#!/bin/bash \n")
-        sh.write("aklog \n")
-        rundir = subprocess.Popen("pwd", shell=True,stdout=pipe).communicate()[0]
-        rundir = rundir.decode('ascii').rstrip("\n")
-        sh.write("cd /cvmfs/cms.cern.ch/slc7_amd64_gcc10/cms/cmssw/CMSSW_12_4_9/ ; cmsenv ; cd - \n")
-        sh.write(" \n")
-        sh.write("export XRD_NETWORKSTACK=IPv4 \n")
-        sh.write('cmsRun %s/%s\n' % (rundir, cfgFileName))
-        sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s/%s\n' % (outFileName, stream, run, eventContent, outFileName))
-        for trigger in triggers:
-            sh.write('cp %s_%s /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s/%s_%s\n' % (trigger, outFileName, stream, run, eventContent, trigger, outFileName))
-        sh.write('cp TPEHists_%i.root /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s/TPEHists_%i.root\n' % (j, stream, run, eventContent, j))
-        sh.close()
-
-        jobdir = os.path.expandvars("${CMSSW_BASE}/src/CSCValidationRunning/AutoValidation/")
-        jobdir += stream + '/run_' + run
-        if not os.path.isdir(jobdir+"/Logs"):
-            os.makedirs(jobdir+"/Logs")
-
-        #Names of file to execute, store output, errors, and job log
-        tjobname     = 'run_' + str(j) + '.sh'
-        tjobname_out = 'run_' + str(j) + '.out'
-        tjobname_err = 'run_' + str(j) + '.err'
-        tjobname_log = 'run_' + str(j) + '.log'
-        #Name of condor job
-        cdjobname = 'job_' + str(j) + '.sub'
-
-        #Set condor options for sub file
-        cjob_to_write =  'executable  = ' + tjobname           + '\n'
-        cjob_to_write += 'arguments   = $(ClusterId)$(ProcId)' + '\n'
-        cjob_to_write += 'Initialdir  = ' + jobdir             + '\n'
-        cjob_to_write += 'output      = ' + tjobname_out       + '\n'
-        cjob_to_write += 'error       = ' + tjobname_err       + '\n'
-        cjob_to_write += 'log         = ' + tjobname_log       + '\n'
-        cjob_to_write += '+JobFlavour = "tomorrow"'            + '\n'
-        #cjob_to_write += 'requirements = (OpSysAndVer =?= "SLCern7") \n'
-        cjob_to_write += 'queue \n'
-        os.system('chmod 755 '+tjobname)
-
-        #Write condor options to sub file
-        cjob = open(jobdir + '/' + cdjobname,'w')
-        cjob.write(cjob_to_write)
-        cjob.close()
-
-        #Submit condor job (sub file)
-        condor_sub = 'condor_submit ' + cdjobname
-        print(condor_sub + '\n')
-        os.system(condor_sub)
-        os.system('sleep 1')
-
-    os.chdir('../')
+    with open(rundir+'/job.sub','w') as f:
+        f.write(job_sub)
 
