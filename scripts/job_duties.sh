@@ -13,14 +13,14 @@ cmsRun VALIDATION_SCRIPT.py
 # Validation script produces two ROOT files, copy them to eos
 eosValHistsFileName="/eos/PATH/TO/FILE.root"
 while
-  localValHistsSum=$(md5 valHists.root)
-  remoteValHistsSum=$(md5 $eosValHistsFileName)
+  localValHistsSum=$(md5sum valHists.root)
+  remoteValHistsSum=$(md5sum $eosValHistsFileName)
   [[ $localValHistsSum -ne $remoteValHistsSum ]]
 do gfal cp valHists.root $eosValHistsFileName; done
 
 eosTPEHistsFileName="/eos/PATH/TO/FILE.root"
 while
-  localTPEHistsSum=$(md5 TPEHists.root)
-  remoteTPEHistsSum=$(md5 $eosTPEHistsFileName)
+  localTPEHistsSum=$(md5sum TPEHists.root)
+  remoteTPEHistsSum=$(md5sum $eosTPEHistsFileName)
   [[ $localTPEHistsSum -ne $remoteTPEHistsSum ]]
 do gfal cp valHists.root $eosValHistsFileName; done
