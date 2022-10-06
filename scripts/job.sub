@@ -1,25 +1,47 @@
-universe=vanilla
+##########################################################################################
+# Condor Job Submission Script for CSCValidation 
+#
+# Authors
+#   Joe Crowley, UC Santa Barbara
+##########################################################################################
+
+## Set up job
+
+# job runs here
+universe                = vanilla
+Requirements            = (HAS_SINGULARITY=?=True)
++SingularityImage       = "/cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel7"
+
+# job executes with these parameters
 executable              = job_duties.sh
-arguments               = {CMSSWVERSION} {SCRAMARCH} {TARFILE} {CONDORSITE} {CONDOROUTDIR} {RUNEXE} {RUNEXEARGS}
-Initialdir              = {outDir}
+arguments               = "CMSSWVERSION SCRAMARCH INFILES CONDORSITE CONDOROUTDIR HOME USER UID"
+
+# job runs here and produces these files
+Initialdir              = $CONDOROUTDIR
 output                  = job.$(ClusterId).$(ProcId).out
 error                   = job.$(ClusterId).$(ProcId).err
 log                     = job.$(ClusterId).$(ProcId).log
+
+# job needs a voms proxy for file access
+x509userproxy           = $HOME/x509up_u$UID
 # request_memory        =  #TODO
-+JobFlavour             = "tomorrow"
-x509userproxy           = {home}/x509up_u{uid}
-#https://www-auth.cs.wisc.edu/lists/htcondor-users/2010-September/msg00009.shtml
+
+# job has to be cleaned up when it fails
+#      - see https://www-auth.cs.wisc.edu/lists/htcondor-users/2010-September/msg00009.shtml
 periodic_remove         = JobStatus == 5
-transfer_executable=True
-transfer_input_files    = # TODO
-transfer_output_files = # TODO
-should_transfer_files = YES
+
+# make sure that everything is where it needs to be
+transfer_executable     = True 
+should_transfer_files   = Yes
+transfer_input_files    = $VALIDATIONSCRIPT, # TODO
+transfer_output_files   = # TODO
 when_to_transfer_output = ON_EXIT_OR_EVICT
-+Owner = {user}
+
+# configure label parameters for the job
++JobFlavour             = "tomorrow"
++Owner = USER
 +project_Name = "cscvalidation"
 notification=Never
-Requirements = (HAS_SINGULARITY=?=True)
-+SingularityImage = "/cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel7"
 
-
+# add the job to the queue
 queue
