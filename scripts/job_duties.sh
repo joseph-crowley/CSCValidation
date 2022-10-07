@@ -24,5 +24,4 @@ cd RUNDIR
 cmsRun validation_cfg.py
 
 # Validation script produces two ROOT files, copy them to eos
-./copyFromCondorToSite.sh $(pwd) valHists.root eoscms.cern.ch $OUTDIR valHists_$JOBTAG.root 
-./copyFromCondorToSite.sh $(pwd) TPEHists.root eoscms.cern.ch $OUTDIR TPEHists_$JOBTAG.root 
+./copyFromCondorToSite.sh $(pwd) validation_histograms.root eoscms.cern.ch $OUTDIR valHists.root 

@@ -18,7 +18,7 @@ process.options = cms.untracked.PSet( SkipEvent = cms.untracked.vstring('Product
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring('FILENAME_REPLACETAG'))
 
 process.cscValidation = cms.EDAnalyzer("CSCValidation",
-    rootFileName = cms.untracked.string('cscv_RAW.root'),
+    rootFileName = cms.untracked.string('validation_histograms.root'),
     isSimulation = cms.untracked.bool(False),
     writeTreeToFile = cms.untracked.bool(True),
     useDigis = cms.untracked.bool(True),
