@@ -44,7 +44,7 @@ def submit_validation_jobs(config):
 
     # setup working directory for stream
     if not os.path.exists(stream):
-        os.makedirs(stream)
+        os.system('mkdir -p {}'.format(stream))
 
     # begin running
     start=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
@@ -112,11 +112,11 @@ def submit_validation_jobs(config):
 
         for run in runsToUpdate:
             if int(run)<MINRUN: continue
-            print(f"Processing run {run}")
             config_tmp = config.copy()
             config_tmp.update({"runNumber":str(run)})
             config_tmp.update({"n_events":str(eventRunMap[run])})
             config_tmp.update({"input_files":fileRunMap[run]})
+            print(f"Processing run {run}")
             run_validation(config_tmp)
 
 
