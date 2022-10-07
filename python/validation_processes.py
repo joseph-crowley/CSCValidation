@@ -113,6 +113,11 @@ def run_validation(config):
 
     with open(rundir+'/job.sub','w') as f:
         f.write(job_sub)
+    
+    # submit the job
+    print(f'Submitting condor job for run {run}')
+    os.system('condor_submit '+rundir+'/job.sub')
+    os.system('sleep 1')
 
 def initialize_validation(stream):
     # setup working directory for stream
