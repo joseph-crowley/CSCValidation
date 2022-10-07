@@ -46,7 +46,7 @@ def submit_validation_jobs(config):
 
     # run each individual validation
     if singleRun:
-        files = use_dbs.get_files(dataset=dataset)
+        files = use_dbs.get_files(dataset=dataset, runs=[singleRun])
         n_events = sum([sum(eval(f['events'])) for f in files])
         print(f"\nNumber of events in all files listed in DAS for this run/dataset:{n_events}")
         input_files = [f['file'] for f in files]
