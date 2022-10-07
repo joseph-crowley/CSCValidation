@@ -83,6 +83,7 @@ def run_validation(config):
     os.system('mkdir -p '+rundir + "/logs")
     os.chdir(rundir)
     os.system('ln -sf '+basedir+'/scripts/copyFromCondorToSite.sh {}/'.format(rundir))
+    os.system('cp -f '+basedir+'/scripts/job_duties.sh {}/'.format(rundir))
     os.system('cp -f '+basedir+'/python/validation_cfg.py {}/'.format(rundir))
 
     # currently only support RAW eventContent
@@ -108,16 +109,13 @@ def run_validation(config):
         job_sub = f.read()
 
     job_sub = job_sub.replace('CONDOROUTDIR_REPLACETAG',rundir)
-    job_sub = job_sub.replace('HOME_REPLACETAG',os.path.expanduser("~"))
     job_sub = job_sub.replace('UID_REPLACETAG',str(os.getuid()))
 
     with open(rundir+'/job.sub','w') as f:
         f.write(job_sub)
     
     # submit the job
-    print(f'Submitting condor job for run {run}')
     os.system('condor_submit '+rundir+'/job.sub')
-    os.system('sleep 1')
 
 def initialize_validation(stream):
     # setup working directory for stream
