@@ -11,7 +11,9 @@ OUTDIR="/eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/$USER/$JOBTAG
 export SCRAM_ARCH=$SCRAMARCH
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 eval `scramv1 project CMSSW $CMSSWVERSION`
+cd $CMSSWVERSION/src
 eval `scramv1 runtime -sh`
+cd - 
 
 mkdir RUNDIR
 mv validation_cfg.py RUNDIR/

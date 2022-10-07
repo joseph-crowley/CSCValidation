@@ -63,6 +63,7 @@ def run_validation(config):
         dryRun           bool      False      create objects and do not submit jobs
         triggers         list(str) []         use multiple triggers
         maxJobNum        int       200        maximum number of jobs to submit
+        jobtag           str       ''         unique tagname for jobs 
     '''
     dataset = config['dataset']
     globaltag = config['globaltag']
@@ -73,6 +74,7 @@ def run_validation(config):
     triggers = config['triggers']
     num = config['n_events']
     input_files = config['input_files']
+    jobtag = config['jobtag']
 
     [stream, eventContent] = get_from_dataset(dataset) 
 
@@ -110,6 +112,12 @@ def run_validation(config):
 
     job_sub = job_sub.replace('CONDOROUTDIR_REPLACETAG',rundir)
     job_sub = job_sub.replace('UID_REPLACETAG',str(os.getuid()))
+
+    # args for job_duties.sh
+    job_sub = job_sub.replace('CMSSWVERSION_REPLACETAG',os.getenv("CMSSW_VERSION"))
+    job_sub = job_sub.replace('SCRAMARCH_REPLACETAG',os.getenv("SCRAM_ARCH"))
+    job_sub = job_sub.replace('USER_REPLACETAG',os.getlogin())
+    job_sub = job_sub.replace('JOBTAG_REPLACETAG',jobtag)
 
     with open(rundir+'/job.sub','w') as f:
         f.write(job_sub)
