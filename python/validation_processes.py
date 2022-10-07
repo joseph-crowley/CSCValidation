@@ -13,6 +13,7 @@
 
 import time
 import os
+import pandas as pd
 
 def get_from_dataset(dataset, streamQ=True, versionQ=False, eventContentQ=True):
     [stream, version, eventContent] = dataset.split('/')[1:]
@@ -86,7 +87,7 @@ def run_validation(config):
 
     # currently only support RAW eventContent
     if eventContent != 'RAW':
-        print('Validation failed. Only eventContent currently supported is RAW')
+        print(f'Validation for dataset {datset} failed. Only eventContent currently supported is RAW')
         return 
 
     # replace template parameters in validation_cfg
@@ -94,7 +95,7 @@ def run_validation(config):
         validation_cfg = f.read()
    
     # format the input files for the ESSource in the validation_cfg
-    input_files_str = "'"+"', '".join(input_files)+"'"
+    input_files_str = "', '".join(input_files)
 
     validation_cfg = validation_cfg.replace('GLOBALTAG_REPLACETAG',globaltag)
     validation_cfg = validation_cfg.replace('FILENAME_REPLACETAG', input_files_str)
@@ -112,4 +113,35 @@ def run_validation(config):
 
     with open(rundir+'/job.sub','w') as f:
         f.write(job_sub)
+
+def initialize_validation(stream):
+    # setup working directory for stream
+    CMSSW_BASE = os.getenv('CMSSW_BASE')
+    basedir = CMSSW_BASE + '/src/CSCValidation'
+    if not os.path.exists(basedir+'/'+stream):
+        os.system('mkdir -p {}/Outputs/ProcessedRuns/{}'.format(basedir,stream))
+
+    # begin running
+    start=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
+    print(f'CSCVal job initiated at {start}')
+    os.chdir(basedir + '/Outputs/ProcessedRuns')
+
+    print('Reading previously processed runs')
+    procFile = basedir + '/Outputs/ProcessedRuns/processedRuns.txt'
+    procRuns = []
+    if os.path.exists(procFile):
+        with open(procFile, 'r') as file:
+            procRuns = file.readlines()
+    procRuns = [x.rstrip() for x in procRuns] # format: RUNUM_NUMEVTS
+
+    print('Reading previous process time')
+    timeFile = basedir + '/Outputs/ProcessedRuns/processTime.txt'
+    procTimes = []
+    if os.path.exists(timeFile):
+        with open(timeFile, 'r') as file:
+            procTimes = file.readlines()
+    procTimes = [x.rstrip() for x in procTimes]
+    prevTime = float(procTimes[-1]) - 12*60*60 if procTimes else float(time.time()) - 7*24*60*60 # default to 7 days before now or 12 hours before last run
+    prevdate = pd.to_datetime(prevTime, unit='s').strftime("%Y/%m/%d %H:%M:%S")
+    print(f'Last run: {prevdate}')
 

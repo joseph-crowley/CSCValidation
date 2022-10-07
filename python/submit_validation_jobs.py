@@ -12,10 +12,9 @@
 
 import time
 import os
-import pandas as pd
 
 from validation_processes import build_runlist, merge_outputs, make_plots
-from validation_processes import get_from_dataset, run_validation
+from validation_processes import get_from_dataset, initialize_validation, run_validation
 
 import use_dbs
 
@@ -42,33 +41,8 @@ def submit_validation_jobs(config):
 
     [stream, eventContent] = get_from_dataset(dataset) 
 
-    # setup working directory for stream
-    if not os.path.exists(stream):
-        os.system('mkdir -p {}'.format(stream))
-
-    # begin running
-    start=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
-    print(f'CSCVal job initiated at {start}')
-    os.chdir(stream)
-
-    print('Reading previously processed runs')
-    procFile = 'processedRuns.txt'
-    procRuns = []
-    if os.path.exists(procFile):
-        with open(procFile, 'r') as file:
-            procRuns = file.readlines()
-    procRuns = [x.rstrip() for x in procRuns] # format: RUNUM_NUMEVTS
-
-    print('Reading previous process time')
-    timeFile = 'processTime.txt'
-    procTimes = []
-    if os.path.exists(timeFile):
-        with open(timeFile, 'r') as file:
-            procTimes = file.readlines()
-    procTimes = [x.rstrip() for x in procTimes]
-    prevTime = float(procTimes[-1]) - 12*60*60 if procTimes else float(time.time()) - 7*24*60*60 # default to 7 days before now or 12 hours before last run
-    prevdate = pd.to_datetime(prevTime, unit='s').strftime("%Y/%m/%d %H:%M:%S")
-    print(f'Last run: {prevdate}')
+    # set up directories, check previous runs
+    initialize_validation(stream)
 
     # run each individual validation
     if singleRun:
