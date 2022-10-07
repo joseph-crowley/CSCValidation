@@ -29,6 +29,7 @@ def parse_command_line(argv):
     parser.add_argument('-f','--force', action='store_true', help='Force a recipe (even if already processed).')
     parser.add_argument('-t','--triggers', nargs='*', help='Optionally run on additional triggers.')
     parser.add_argument('-mj','--maxJobNum', type=int, default=200, help='Can use to control the total number of batch jobs submitted out of all of the different files for a run (specified by LFN), as seen on DAS.')
+    parser.add_argument('-mr','--minrun', type=int, default=300576, help='minimum run to validate')
 
     args = parser.parse_args(argv)
     return args

@@ -95,7 +95,7 @@ def merge_outputs(config):
             continue
 
         rundir = 'run_%s' % run
-        os.mkdirs(rundir)
+        os.makedirs(rundir)
         os.chdir(rundir)
 
         tpeOut = 'TPEHists.root'
@@ -303,7 +303,7 @@ def run_validation(config):
     # Create working directory for specific run number
     basedir = '$CMSSW_BASE/src/CSCValidation'
     rundir = basedir+'/Outputs/tasks/{}/run_{}'.format(stream, run)
-    os.mkdirs(rundir + "/Logs")
+    os.makedirs(rundir + "/Logs")
     os.chdir(rundir)
     os.system('ln -sf '+basedir+'/scripts/copyFromCondorToSite.sh {}/'.format(rundir))
     os.system('cp -f '+basedir+'/python/validation_cfg.py {}/'.format(rundir))

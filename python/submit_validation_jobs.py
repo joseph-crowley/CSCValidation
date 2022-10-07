@@ -37,6 +37,7 @@ def submit_validation_jobs(config):
     force = config['force']
     dryRun = config['dryRun']
     maxJobNum = config['maxJobNum']
+    MINRUN = config['minrun']
     time0 = time.time()
 
     [stream, eventContent] = get_from_dataset(dataset) 
