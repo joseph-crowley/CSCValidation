@@ -79,7 +79,7 @@ def run_validation(config):
     # Create working directory for specific run number
     CMSSW_BASE = os.getenv('CMSSW_BASE')
     basedir = CMSSW_BASE + '/src/CSCValidation'
-    rundir = basedir+'/Outputs/tasks/{}/run_{}'.format(stream, run)
+    rundir = basedir+'/outputs/tasks/{}/run_{}'.format(stream, run)
     os.system('mkdir -p '+rundir + "/Logs")
     os.chdir(rundir)
     os.system('ln -sf '+basedir+'/scripts/copyFromCondorToSite.sh {}/'.format(rundir))
