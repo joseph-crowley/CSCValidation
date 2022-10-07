@@ -84,7 +84,7 @@ def submit_validation_jobs(config):
         for run in runsToUpdate:
             print(f'    Run {run}: {len(fileRunMap[run])} files, {eventRunMap[run]} events')
 
-        for run in runsToUpdate:
+        for run in runsToUpdate[:1]:
             if int(run)<MINRUN: continue
             config_tmp = config.copy()
             config_tmp.update({"runNumber":str(run)})

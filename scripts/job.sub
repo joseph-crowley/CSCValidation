@@ -20,9 +20,9 @@ arguments               = "CMSSWVERSION SCRAMARCH JOBTAG USER"
 
 # job runs here and produces these files
 Initialdir              = CONDOROUTDIR_REPLACETAG
-output                  = job.$(ClusterId).$(ProcId).out
-error                   = job.$(ClusterId).$(ProcId).err
-log                     = job.$(ClusterId).$(ProcId).log
+output                  = logs/job.$(ClusterId).$(ProcId).out
+error                   = logs/job.$(ClusterId).$(ProcId).err
+log                     = logs/job.$(ClusterId).$(ProcId).log
 
 # job needs a voms proxy for file access
 x509userproxy           = /tmp/x509up_uUID_REPLACETAG
@@ -32,10 +32,11 @@ x509userproxy           = /tmp/x509up_uUID_REPLACETAG
 periodic_remove         = JobStatus == 5
 
 # make sure that everything is where it needs to be
+# transfer_output_files intentionally left blank
 transfer_executable     = True 
 should_transfer_files   = Yes
 transfer_input_files    = validation_cfg.py,copyFromCondorToSite.sh
-transfer_output_files   = # intentionally left blank
+transfer_output_files   = 
 when_to_transfer_output = ON_EXIT_OR_EVICT
 
 # configure label parameters for the job
