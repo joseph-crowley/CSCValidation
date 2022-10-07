@@ -6,7 +6,7 @@ JOBTAG=$3
 USER=$4
 RUN=$5
 
-OUTDIR="/eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/$USER/$JOBTAG/run_$RUN"
+OUTDIR="/eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/$USER/$JOBTAG"
 
 # set up environment
 export SCRAM_ARCH=$SCRAMARCH
