@@ -1,13 +1,13 @@
 #include "CMSSW_BASE_REPLACETAG/CSCValidation/root/cscValFunctions.C"
 
-void makeGraphs(TString inputdir = "/eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/SingleMuon/runRUN_REPLACETAG_RAW", int maxfiles = 300) {
+void makeGraphs(TString inputdir = ".", int maxfiles = 300) {
 
   TChain* rhchain = new TChain("recHits/rHPositions");
   TChain* segchain = new TChain("Segments/segPositions");
 
   int nfiles = rhchain->Add(inputdir+"/valHists_*.root");
   cout << "[makeGraphs] Total number of files: " << nfiles << endl;
-  segchain->Add(inputdir+"/valHists_runRUN_REPLACETAG_SingleMuon_*.root");
+  segchain->Add(inputdir+"/valHists_run*.root");
 
   //Make global position graphs from trees
   GlobalPosfromChain("Global recHit positions ME+1", rhchain, 1, 1, "rechit", "rHglobal_station_+1.png");

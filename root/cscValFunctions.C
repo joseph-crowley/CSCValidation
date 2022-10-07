@@ -843,7 +843,7 @@ void GlobalPosfromTree(std::string graphname, TFile* f1, int endcap, int station
 
 } // end GlobalPosfromTree
 
-void GlobalPosfromChain(std::string graphname, TChain* ch1, int endcap, int station, std::string type, std::string savename, const int maxNumPoints = 10'000'000) {
+void GlobalPosfromChain(std::string graphname, TChain* ch1, int endcap, int station, std::string type, std::string savename, const int maxNumPoints = 10000000) {
 
   struct posRecord {
     int endcap;
