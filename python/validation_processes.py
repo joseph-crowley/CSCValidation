@@ -119,15 +119,15 @@ def initialize_validation(stream):
     CMSSW_BASE = os.getenv('CMSSW_BASE')
     basedir = CMSSW_BASE + '/src/CSCValidation'
     if not os.path.exists(basedir+'/'+stream):
-        os.system('mkdir -p {}/outputs/ProcessedRuns/{}'.format(basedir,stream))
+        os.system('mkdir -p {}/outputs/processedRuns/{}'.format(basedir,stream))
 
     # begin running
     start=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
     print(f'CSCVal job initiated at {start}')
-    os.chdir(basedir + '/outputs/ProcessedRuns')
+    os.chdir(basedir + '/outputs/processedRuns')
 
     print('Reading previously processed runs')
-    procFile = basedir + '/outputs/ProcessedRuns/processedRuns.txt'
+    procFile = basedir + '/outputs/processedRuns/processedRuns.txt'
     procRuns = []
     if os.path.exists(procFile):
         with open(procFile, 'r') as file:
@@ -135,7 +135,7 @@ def initialize_validation(stream):
     procRuns = [x.rstrip() for x in procRuns] # format: RUNUM_NUMEVTS
 
     print('Reading previous process time')
-    timeFile = basedir + '/outputs/ProcessedRuns/processTime.txt'
+    timeFile = basedir + '/outputs/processedRuns/processTime.txt'
     procTimes = []
     if os.path.exists(timeFile):
         with open(timeFile, 'r') as file:
