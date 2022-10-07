@@ -10,12 +10,12 @@ print(f"Start making plots for run RUN_REPLACETAG\nStart: {curtime}", file=sys.s
 os.system("root -l -q -b makePlots.C")
 os.system("root -l -q -b makeGraphs.C")
 
-print "made plots for run RUN_REPLACETAG"
+print("Made plots for run RUN_REPLACETAG")
 
 #make the web page
 web_dir = "/eos/cms/store/group/dpg_csc/comm_csc/cscval/www"
 
-print(f"Start moving plots for runRUN_REPLACETAG to eos\nStart: {curtime}", file=sys.stderr)
+print(f"Moving plots for runRUN_REPLACETAG to eos\nStart: {curtime}", file=sys.stderr)
 os.system("mkdir -p {0}/results/runRUN_REPLACETAG/SingleMuon/Site".format(web_dir))
 os.system("mkdir -p {0}/results/runRUN_REPLACETAG/SingleMuon/Site/PNGS".format(web_dir))
 os.system("cp Summary.html {0}/results/runRUN_REPLACETAG/SingleMuon/Site".format(web_dir))
