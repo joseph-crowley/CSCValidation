@@ -4,8 +4,9 @@ CMSSWVERSION=$1
 SCRAMARCH=$2
 JOBTAG=$3
 USER=$4
+RUN=$5
 
-OUTDIR="/eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/$USER/$JOBTAG"
+OUTDIR="/eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/$USER/$JOBTAG/run_$RUN"
 
 # set up environment
 export SCRAM_ARCH=$SCRAMARCH
@@ -24,4 +25,4 @@ cd RUNDIR
 cmsRun validation_cfg.py
 
 # Validation script produces two ROOT files, copy them to eos
-./copyFromCondorToSite.sh $(pwd) validation_histograms.root eoscms.cern.ch $OUTDIR valHists.root 
+./copyFromCondorToSite.sh $(pwd) validation_histograms.root eoscms.cern.ch $OUTDIR valHists_$RUN.root 

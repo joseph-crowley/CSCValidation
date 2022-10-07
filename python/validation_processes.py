@@ -118,6 +118,7 @@ def run_validation(config):
     job_sub = job_sub.replace('SCRAMARCH_REPLACETAG',os.getenv("SCRAM_ARCH"))
     job_sub = job_sub.replace('USER_REPLACETAG',os.getlogin())
     job_sub = job_sub.replace('JOBTAG_REPLACETAG',jobtag)
+    job_sub = job_sub.replace('RUN_REPLACETAG',run)
 
     with open(rundir+'/job.sub','w') as f:
         f.write(job_sub)

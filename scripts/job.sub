@@ -16,7 +16,7 @@ Requirements            = (HAS_SINGULARITY=?=True)
 
 # job executes with these parameters
 executable              = job_duties.sh
-arguments               = "CMSSWVERSION_REPLACETAG SCRAMARCH_REPLACETAG JOBTAG_REPLACETAG USER_REPLACETAG"
+arguments               = "CMSSWVERSION_REPLACETAG SCRAMARCH_REPLACETAG JOBTAG_REPLACETAG USER_REPLACETAG RUN_REPLACETAG"
 
 # job runs here and produces these files
 Initialdir              = CONDOROUTDIR_REPLACETAG
