@@ -80,7 +80,7 @@ def run_validation(config):
     CMSSW_BASE = os.getenv('CMSSW_BASE')
     basedir = CMSSW_BASE + '/src/CSCValidation'
     rundir = basedir+'/outputs/tasks/{}/run_{}'.format(stream, run)
-    os.system('mkdir -p '+rundir + "/Logs")
+    os.system('mkdir -p '+rundir + "/logs")
     os.chdir(rundir)
     os.system('ln -sf '+basedir+'/scripts/copyFromCondorToSite.sh {}/'.format(rundir))
     os.system('cp -f '+basedir+'/python/validation_cfg.py {}/'.format(rundir))
@@ -119,15 +119,15 @@ def initialize_validation(stream):
     CMSSW_BASE = os.getenv('CMSSW_BASE')
     basedir = CMSSW_BASE + '/src/CSCValidation'
     if not os.path.exists(basedir+'/'+stream):
-        os.system('mkdir -p {}/Outputs/ProcessedRuns/{}'.format(basedir,stream))
+        os.system('mkdir -p {}/outputs/ProcessedRuns/{}'.format(basedir,stream))
 
     # begin running
     start=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
     print(f'CSCVal job initiated at {start}')
-    os.chdir(basedir + '/Outputs/ProcessedRuns')
+    os.chdir(basedir + '/outputs/ProcessedRuns')
 
     print('Reading previously processed runs')
-    procFile = basedir + '/Outputs/ProcessedRuns/processedRuns.txt'
+    procFile = basedir + '/outputs/ProcessedRuns/processedRuns.txt'
     procRuns = []
     if os.path.exists(procFile):
         with open(procFile, 'r') as file:
@@ -135,7 +135,7 @@ def initialize_validation(stream):
     procRuns = [x.rstrip() for x in procRuns] # format: RUNUM_NUMEVTS
 
     print('Reading previous process time')
-    timeFile = basedir + '/Outputs/ProcessedRuns/processTime.txt'
+    timeFile = basedir + '/outputs/ProcessedRuns/processTime.txt'
     procTimes = []
     if os.path.exists(timeFile):
         with open(timeFile, 'r') as file:
