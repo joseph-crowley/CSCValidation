@@ -16,14 +16,14 @@ print("Made plots for run RUN_REPLACETAG")
 web_dir = "/eos/cms/store/group/dpg_csc/comm_csc/cscval/www"
 
 print(f"Moving plots for runRUN_REPLACETAG to eos\nStart: {curtime}", file=sys.stderr)
-os.system("mkdir -p {0}/results/runRUN_REPLACETAG/SingleMuon/Site".format(web_dir))
-os.system("mkdir -p {0}/results/runRUN_REPLACETAG/SingleMuon/Site/PNGS".format(web_dir))
-os.system("cp Summary.html {0}/results/runRUN_REPLACETAG/SingleMuon/Site".format(web_dir))
-os.system("cp validation_RUN_REPLACETAG_cfg.py {0}/results/runRUN_REPLACETAG/SingleMuon/Site/PNGS/config.py".format(web_dir))
-os.system("mv *.png {0}/results/runRUN_REPLACETAG/SingleMuon/Site/PNGS".format(web_dir))
+os.system(f"mkdir -p {web_dir}/results/runRUN_REPLACETAG/STREAM_REPLACETAG/Site")
+os.system(f"mkdir -p {web_dir}/results/runRUN_REPLACETAG/STREAM_REPLACETAG/Site/PNGS")
+os.system(f"cp Summary.html {web_dir}/results/runRUN_REPLACETAG/STREAM_REPLACETAG/Site")
+os.system(f"cp validation_RUN_REPLACETAG_cfg.py {web_dir}/results/runRUN_REPLACETAG/STREAM_REPLACETAG/Site/PNGS/config.py")
+os.system(f"mv *.png {web_dir}/results/runRUN_REPLACETAG/STREAM_REPLACETAG/Site/PNGS")
 
 # Keep updating the website on AFS
-print(f"Start moving plots for run355870 to AFS\nStart: {curtime}", file=sys.stderr)
+print(f"Start moving plots for run RUN_REPLACETAG to AFS\nStart: {curtime}", file=sys.stderr)
 afsloc = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results"
-os.system("mkdir -p {0}/results/runRUN_REPLACETAG/".format(afsloc))
-os.system("cp -r {0}/results/runRUN_REPLACETAG/SingleMuon/ {1}/results/runRUN_REPLACETAG/SingleMuon/".format(web_dir, afsloc))
+os.system(f"mkdir -p {afsloc}/results/runRUN_REPLACETAG/")
+os.system("cp -r {web_dir}/results/runRUN_REPLACETAG/STREAM_REPLACETAG/ {afsloc}/results/runRUN_REPLACETAG/STREAM_REPLACETAG/")
