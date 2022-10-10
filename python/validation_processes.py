@@ -107,6 +107,17 @@ def run_validation(config):
         f.write(validation_cfg)
 
     # replace template parameters in job.sub
+    with open(basedir+'/python/plots_and_graphs.py','r') as f:
+        plots_and_graphs = f.read()
+
+    # set up locations for PNGS
+    plots_and_graphs = plots_and_graphs.replace('RUN_REPLACETAG',run)
+    plots_and_graphs = plots_and_graphs.replace('STREAM_REPLACETAG',stream)
+
+    with open(rundir+'/plots_and_graphs.py','w') as f:
+        f.write(plots_and_graphs)
+
+    # replace template parameters in job.sub
     with open(basedir+'/scripts/job.sub','r') as f:
         job_sub = f.read()
 
