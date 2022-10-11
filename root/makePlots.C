@@ -2,7 +2,7 @@
 
 void makePlots() {
   
-  std::string Path = "valHists_*.root";
+  std::string Path = "validation_histograms.root";
 
   // define the functions from the external file
   extern TFile* OpenFiles(std::string path);

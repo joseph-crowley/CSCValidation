@@ -93,6 +93,22 @@ def run_validation(config):
         print(f'Validation for dataset {datset} failed. Only eventContent currently supported is RAW')
         return 
 
+    # fill the templates in the rundir for the job
+    replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_BASE, run, stream, jobtag)
+    # set up directories for the images
+    configure_output_directories(run,stream)
+
+    # submit the job
+    os.system('condor_submit '+rundir+'/job.sub')
+
+def configure_output_directories(run, stream):
+    web_dir = "/eos/cms/store/group/dpg_csc/comm_csc/cscval/www"
+    os.system(f"mkdir -p {web_dir}/results/run{run}/{stream}/Site/PNGS")
+
+    afsloc = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results"
+    os.system(f"mkdir -p {afsloc}/results/run{run}/")
+
+def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_BASE, run, stream, jobtag):
     # replace template parameters in validation_cfg
     with open(basedir+'/python/validation_cfg.py','r') as f:
         validation_cfg = f.read()
@@ -106,7 +122,26 @@ def run_validation(config):
     with open(rundir+'/validation_cfg.py','w') as f:
         f.write(validation_cfg)
 
-    # replace template parameters in job.sub
+    # replace template parameters in makeGraphs.C
+    with open(basedir+'/root/makeGraphs.C','r') as f:
+        make_graphs = f.read()
+
+    make_graphs = make_graphs.replace('CMSSW_BASE_REPLACETAG',CMSSW_BASE)
+
+    with open(rundir+'/makeGraphs.C','w') as f:
+        f.write(make_graphs)
+
+    # replace template parameters in makePlots.C
+    with open(basedir+'/root/makePlots.C','r') as f:
+        make_plots = f.read()
+
+    # set up locations for PNGS
+    make_plots = make_plots.replace('CMSSW_BASE_REPLACETAG',CMSSW_BASE)
+
+    with open(rundir+'/makePlots.C','w') as f:
+        f.write(make_plots)
+
+    # replace template parameters in the plotting script
     with open(basedir+'/python/plots_and_graphs.py','r') as f:
         plots_and_graphs = f.read()
 
@@ -134,8 +169,6 @@ def run_validation(config):
     with open(rundir+'/job.sub','w') as f:
         f.write(job_sub)
     
-    # submit the job
-    os.system('condor_submit '+rundir+'/job.sub')
 
 def initialize_validation(stream):
     # setup working directory for stream
