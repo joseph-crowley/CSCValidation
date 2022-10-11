@@ -105,8 +105,8 @@ def configure_output_directories(run, stream):
     web_dir = "/eos/cms/store/group/dpg_csc/comm_csc/cscval/www"
     os.system(f"mkdir -p {web_dir}/results/run{run}/{stream}/Site/PNGS")
 
-    afsloc = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results"
-    os.system(f"mkdir -p {afsloc}/results/run{run}/")
+    #afsloc = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results"
+    #os.system(f"mkdir -p {afsloc}/results/run{run}/")
 
 def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_BASE, run, stream, jobtag):
     # replace template parameters in validation_cfg
