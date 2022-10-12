@@ -146,7 +146,7 @@ def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_B
         csc_functions = f.read()
 
     with open(rundir+'/cscValFunctions.C','w') as f:
-        f.write(make_plots)
+        f.write(csc_functions)
 
     # replace template parameters in the plotting script
     with open(basedir+'/python/plots_and_graphs.py','r') as f:
