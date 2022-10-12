@@ -35,7 +35,7 @@ periodic_remove         = JobStatus == 5
 # transfer_output_files intentionally left blank
 transfer_executable     = True 
 should_transfer_files   = Yes
-transfer_input_files    = validation_cfg.py,copyFromCondorToSite.sh,plots_and_graphs.py,makeGraphs.C,makePlots.C
+transfer_input_files    = validation_cfg.py,copyFromCondorToSite.sh,plots_and_graphs.py,cscValFunctions.C,makeGraphs.C,makePlots.C
 transfer_output_files   = 
 when_to_transfer_output = ON_EXIT_OR_EVICT
 

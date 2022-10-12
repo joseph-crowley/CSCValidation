@@ -1,4 +1,4 @@
-#include "CMSSW_BASE_REPLACETAG/src/CSCValidation/root/cscValFunctions.C"
+#include "cscValFunctions.C"
 
 void makeGraphs(TString inputdir = ".", int maxfiles = 300) {
 
