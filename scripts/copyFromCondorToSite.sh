@@ -5,9 +5,6 @@
 #     Ulascan Sarica, UC Santa Barbara
 #     Joe Crowley,    UC Santa Barbara
 
-
-
-
 getFilePath(){
   local indir=$1
   local fname=$2
