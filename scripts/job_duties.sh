@@ -21,8 +21,7 @@ cd -
 mkdir RUNDIR
 mv validation_cfg.py RUNDIR/
 mv plots_and_graphs.py RUNDIR/
-mv makeGraphs.C RUNDIR/  
-mv makePlots.C RUNDIR/
+mv *.C RUNDIR/  
 mv copyFromCondorToSite.sh RUNDIR/
 cd RUNDIR
 
