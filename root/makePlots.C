@@ -1,4 +1,4 @@
-#include "CMSSW_BASE_REPLACETAG/CSCValidation/root/cscValFunctions.C"
+#include "CMSSW_BASE_REPLACETAG/src/CSCValidation/root/cscValFunctions.C"
 
 void makePlots() {
   
