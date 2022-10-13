@@ -110,7 +110,7 @@ def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_B
     validation_cfg = validation_cfg.replace('GLOBALTAG_REPLACETAG', globaltag)
     validation_cfg = validation_cfg.replace('FILENAME_REPLACETAG', input_files_str)
     validation_cfg = validation_cfg.replace('RUN_REPLACETAG', run)
-    validation_cfg = validation_cfg.replace('MAXEVENTS_REPLACETAG', n_events)
+    validation_cfg = validation_cfg.replace('MAXEVENTS_REPLACETAG', str(n_events))
 
     with open(rundir+'/validation_cfg.py','w') as f:
         f.write(validation_cfg)
