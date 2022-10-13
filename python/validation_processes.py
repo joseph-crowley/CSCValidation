@@ -84,9 +84,11 @@ def run_validation(config):
     rundir = basedir+'/outputs/tasks/{}/run_{}'.format(stream, run)
     os.system('mkdir -p '+rundir + "/logs")
     os.chdir(rundir)
+    
+    # copy over the necessary files
     os.system('ln -sf '+basedir+'/scripts/copyFromCondorToSite.sh {}/'.format(rundir))
+    os.system('ln -sf '+basedir+'/RecoLocalMuon.tar {}/'.format(rundir))
     os.system('cp -f '+basedir+'/scripts/job_duties.sh {}/'.format(rundir))
-    os.system('cp -f '+basedir+'/python/validation_cfg.py {}/'.format(rundir))
 
     # currently only support RAW eventContent
     if eventContent != 'RAW':
@@ -128,7 +130,7 @@ def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_B
     job_sub = job_sub.replace('CONDOROUTDIR_REPLACETAG', rundir)
     job_sub = job_sub.replace('UID_REPLACETAG', str(os.getuid()))
 
-    # args for job_duties.sh
+    # args for job.sub
     job_sub = job_sub.replace('CMSSWVERSION_REPLACETAG', os.getenv("CMSSW_VERSION"))
     job_sub = job_sub.replace('SCRAMARCH_REPLACETAG', os.getenv("SCRAM_ARCH"))
     job_sub = job_sub.replace('USER_REPLACETAG', os.getlogin())
