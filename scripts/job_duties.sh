@@ -16,12 +16,14 @@ source /cvmfs/cms.cern.ch/cmsset_default.sh
 eval `scramv1 project CMSSW $CMSSWVERSION`
 cd $CMSSWVERSION/src
 eval `scramv1 runtime -sh`
+git cms-addpkg RecoLocalMuon/CSCValidation
+scramv1 b -j 1
 cd - 
 
 mkdir RUNDIR
 mv validation_cfg.py RUNDIR/
 mv plots_and_graphs.py RUNDIR/
-mv *.C RUNDIR/  
+mv $CMSSW_BASE/src/RecoLocalMuon/CSCValidation/macros/*.C RUNDIR/  
 mv copyFromCondorToSite.sh RUNDIR/
 cd RUNDIR
 
@@ -29,7 +31,7 @@ cd RUNDIR
 cmsRun validation_cfg.py
 
 # make the plots with the output
-python3 plots_and_graphs.py
+root -b -l -q makePlots.C( "validation_histograms.root" )
 
 # Validation script produces ROOT files, copy them to eos
 ./copyFromCondorToSite.sh $(pwd) validation_histograms.root eoscms.cern.ch $OUTDIR valHists_$RUN.root 

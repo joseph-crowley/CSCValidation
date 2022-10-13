@@ -115,32 +115,6 @@ def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_B
     with open(rundir+'/validation_cfg.py','w') as f:
         f.write(validation_cfg)
 
-    # replace template parameters in makeGraphs.C
-    with open(basedir+'/root/makeGraphs.C','r') as f:
-        make_graphs = f.read()
-
-    make_graphs = make_graphs.replace('CMSSW_BASE_REPLACETAG', CMSSW_BASE)
-
-    with open(rundir+'/makeGraphs.C','w') as f:
-        f.write(make_graphs)
-
-    # replace template parameters in makePlots.C
-    with open(basedir+'/root/makePlots.C','r') as f:
-        make_plots = f.read()
-
-    # set up locations for PNGS
-    make_plots = make_plots.replace('CMSSW_BASE_REPLACETAG', CMSSW_BASE)
-
-    with open(rundir+'/makePlots.C','w') as f:
-        f.write(make_plots)
-
-    # replace template parameters in cscValFunctions.C
-    with open(basedir+'/root/cscValFunctions.C','r') as f:
-        csc_functions = f.read()
-
-    with open(rundir+'/cscValFunctions.C','w') as f:
-        f.write(csc_functions)
-
     # replace template parameters in the plotting script
     with open(basedir+'/python/plots_and_graphs.py','r') as f:
         plots_and_graphs = f.read()
