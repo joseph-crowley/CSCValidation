@@ -17,7 +17,7 @@ source /cvmfs/cms.cern.ch/cmsset_default.sh
 eval `scramv1 project CMSSW $CMSSWVERSION`
 cd $CMSSWVERSION/src
 eval `scramv1 runtime -sh`
-git cms-addpkg RecoLocalMuon/CSCValidation
+tar -xf $JOBDIR/RecoLocalMuon.tar .
 scramv1 b -j 1
 cp -r RecoLocalMuon/CSCValidation/ $JOBDIR
 cd $JOBDIR 
