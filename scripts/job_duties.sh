@@ -23,7 +23,8 @@ cd -
 mkdir RUNDIR
 mv validation_cfg.py RUNDIR/
 mv plots_and_graphs.py RUNDIR/
-mv $CMSSW_BASE/src/RecoLocalMuon/CSCValidation/macros/*.C RUNDIR/  
+mv $CMSSW_BASE/src/RecoLocalMuon/CSCValidation/macros/makePlots.C RUNDIR/  
+mv $CMSSW_BASE/src/RecoLocalMuon/CSCValidation/macros/myFunctions.C RUNDIR/  
 mv copyFromCondorToSite.sh RUNDIR/
 cd RUNDIR
 
