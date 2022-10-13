@@ -6,6 +6,7 @@ JOBTAG=$3
 USER=$4
 RUN=$5
 
+JOBDIR=$(pwd)
 OUTDIR="/eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/$USER/$JOBTAG"
 SITEDIR="/eos/cms/store/group/dpg_csc/comm_csc/cscval/www/results/runRUN_REPLACETAG/STREAM_REPLACETAG/Site"
 IMGDIR="$SITEDIR/PNGS"
@@ -18,13 +19,13 @@ cd $CMSSWVERSION/src
 eval `scramv1 runtime -sh`
 git cms-addpkg RecoLocalMuon/CSCValidation
 scramv1 b -j 1
-cd - 
+cp -r RecoLocalMuon/CSCValidation/ $JOBDIR
+cd $JOBDIR 
 
 mkdir RUNDIR
 mv validation_cfg.py RUNDIR/
-mv plots_and_graphs.py RUNDIR/
-mv $CMSSW_BASE/src/RecoLocalMuon/CSCValidation/macros/makePlots.C RUNDIR/  
-mv $CMSSW_BASE/src/RecoLocalMuon/CSCValidation/macros/myFunctions.C RUNDIR/  
+mv /RecoLocalMuon/CSCValidation/macros/makePlots.C RUNDIR/  
+mv /RecoLocalMuon/CSCValidation/macros/myFunctions.C RUNDIR/  
 mv copyFromCondorToSite.sh RUNDIR/
 cd RUNDIR
 
