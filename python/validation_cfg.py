@@ -13,7 +13,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'GLOBALTAG_REPLACETAG', '')
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(MAXEVENTS_REPLACETAG) )
 process.options = cms.untracked.PSet( SkipEvent = cms.untracked.vstring('ProductNotFound') )
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring('FILENAME_REPLACETAG'))
 

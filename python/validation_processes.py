@@ -72,7 +72,7 @@ def run_validation(config):
     force = config['force']
     dryRun = config['dryRun']
     triggers = config['triggers']
-    num = config['n_events']
+    n_events = config['n_events']
     input_files = config['input_files']
     jobtag = config['jobtag']
 
@@ -95,20 +95,11 @@ def run_validation(config):
 
     # fill the templates in the rundir for the job
     replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_BASE, run, stream, jobtag)
-    # set up directories for the images
-    #configure_output_directories(run,stream)
-
     # submit the job
     os.system('condor_submit '+rundir+'/job.sub')
 
-#def configure_output_directories(run, stream):
-#    web_dir = "/eos/cms/store/group/dpg_csc/comm_csc/cscval/www"
-#    os.system(f"gfal-mkdir -p {web_dir}/results/run{run}/{stream}/Site/PNGS")
-#
-#    #afsloc = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results"
-#    #os.system(f"mkdir -p {afsloc}/results/run{run}/")
 
-def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_BASE, run, stream, jobtag):
+def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_BASE, run, stream, jobtag, n_events=100):
     # replace template parameters in validation_cfg
     with open(basedir+'/python/validation_cfg.py','r') as f:
         validation_cfg = f.read()
@@ -116,8 +107,10 @@ def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_B
     # format the input files for the ESSource in the validation_cfg
     input_files_str = "', '".join(input_files)
 
-    validation_cfg = validation_cfg.replace('GLOBALTAG_REPLACETAG',globaltag)
+    validation_cfg = validation_cfg.replace('GLOBALTAG_REPLACETAG', globaltag)
     validation_cfg = validation_cfg.replace('FILENAME_REPLACETAG', input_files_str)
+    validation_cfg = validation_cfg.replace('RUN_REPLACETAG', run)
+    validation_cfg = validation_cfg.replace('MAXEVENTS_REPLACETAG', n_events)
 
     with open(rundir+'/validation_cfg.py','w') as f:
         f.write(validation_cfg)
@@ -126,7 +119,7 @@ def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_B
     with open(basedir+'/root/makeGraphs.C','r') as f:
         make_graphs = f.read()
 
-    make_graphs = make_graphs.replace('CMSSW_BASE_REPLACETAG',CMSSW_BASE)
+    make_graphs = make_graphs.replace('CMSSW_BASE_REPLACETAG', CMSSW_BASE)
 
     with open(rundir+'/makeGraphs.C','w') as f:
         f.write(make_graphs)
@@ -136,7 +129,7 @@ def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_B
         make_plots = f.read()
 
     # set up locations for PNGS
-    make_plots = make_plots.replace('CMSSW_BASE_REPLACETAG',CMSSW_BASE)
+    make_plots = make_plots.replace('CMSSW_BASE_REPLACETAG', CMSSW_BASE)
 
     with open(rundir+'/makePlots.C','w') as f:
         f.write(make_plots)
@@ -153,8 +146,8 @@ def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_B
         plots_and_graphs = f.read()
 
     # set up locations for PNGS
-    plots_and_graphs = plots_and_graphs.replace('RUN_REPLACETAG',run)
-    plots_and_graphs = plots_and_graphs.replace('STREAM_REPLACETAG',stream)
+    plots_and_graphs = plots_and_graphs.replace('RUN_REPLACETAG', run)
+    plots_and_graphs = plots_and_graphs.replace('STREAM_REPLACETAG', stream)
 
     with open(rundir+'/plots_and_graphs.py','w') as f:
         f.write(plots_and_graphs)
@@ -163,15 +156,15 @@ def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_B
     with open(basedir+'/scripts/job.sub','r') as f:
         job_sub = f.read()
 
-    job_sub = job_sub.replace('CONDOROUTDIR_REPLACETAG',rundir)
-    job_sub = job_sub.replace('UID_REPLACETAG',str(os.getuid()))
+    job_sub = job_sub.replace('CONDOROUTDIR_REPLACETAG', rundir)
+    job_sub = job_sub.replace('UID_REPLACETAG', str(os.getuid()))
 
     # args for job_duties.sh
-    job_sub = job_sub.replace('CMSSWVERSION_REPLACETAG',os.getenv("CMSSW_VERSION"))
-    job_sub = job_sub.replace('SCRAMARCH_REPLACETAG',os.getenv("SCRAM_ARCH"))
-    job_sub = job_sub.replace('USER_REPLACETAG',os.getlogin())
-    job_sub = job_sub.replace('JOBTAG_REPLACETAG',jobtag)
-    job_sub = job_sub.replace('RUN_REPLACETAG',run)
+    job_sub = job_sub.replace('CMSSWVERSION_REPLACETAG', os.getenv("CMSSW_VERSION"))
+    job_sub = job_sub.replace('SCRAMARCH_REPLACETAG', os.getenv("SCRAM_ARCH"))
+    job_sub = job_sub.replace('USER_REPLACETAG', os.getlogin())
+    job_sub = job_sub.replace('JOBTAG_REPLACETAG', jobtag)
+    job_sub = job_sub.replace('RUN_REPLACETAG', run)
 
     with open(rundir+'/job.sub','w') as f:
         f.write(job_sub)
