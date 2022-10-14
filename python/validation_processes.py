@@ -97,15 +97,8 @@ def run_validation(config):
 
     # fill the templates in the rundir for the job
     replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_BASE, run, stream, jobtag)
-    # set up dependencies
-    source_dependencies(basedir, rundir)
-
     # submit the job
     os.system('condor_submit '+rundir+'/job.sub')
-
-def source_dependencies(basedir, rundir):
-    # root scripts for plotting are in cmssw, add them to the job folder
-    os.system('cp ' + basedir + '/RecoLocalMuon.tar ' + rundir + '/RecoLocalMuon.tar')
 
 def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_BASE, run, stream, jobtag, n_events=100):
     # replace template parameters in validation_cfg
