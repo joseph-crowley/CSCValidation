@@ -19,13 +19,13 @@ cd $CMSSWVERSION/src
 eval `scramv1 runtime -sh`
 tar -xf $JOBDIR/RecoLocalMuon.tar
 scramv1 b -j 1
-cp -r RecoLocalMuon/CSCValidation/ $JOBDIR
+cp -r RecoLocalMuon/ $JOBDIR
 cd $JOBDIR 
 
 mkdir RUNDIR
 mv validation_cfg.py RUNDIR/
-mv $CMSSWVERSION/src/RecoLocalMuon/CSCValidation/macros/makePlots.C RUNDIR/  
-mv $CMSSWVERSION/src/RecoLocalMuon/CSCValidation/macros/myFunctions.C RUNDIR/  
+mv $JOBDIR/RecoLocalMuon/CSCValidation/macros/makePlots.* RUNDIR/  
+mv $JOBDIR/RecoLocalMuon/CSCValidation/macros/myFunctions.C RUNDIR/  
 mv copyFromCondorToSite.sh RUNDIR/
 cd RUNDIR
 
@@ -33,7 +33,20 @@ cd RUNDIR
 cmsRun validation_cfg.py
 
 # make the plots with the output
-root -b -l -q makePlots.C( "validation_histograms.root" )
+# note: there are two forms of this depending on CMSSW version. 
+#       this script will evaluate whichever it finds first
+cFile=$(ls makePlots.C | wc -l)
+shFile=$(ls makePlots.sh | wc -l)
+
+if [ $cFile -eq 1 ]; then
+  echo "Using makePlots.C"
+  root -b -l -q makePlots.C( "validation_histograms.root" )
+elif [ $shFile -eq 1 ]; then 
+  echo "Using makePlots.sh"
+  ./makePlots.sh validation_histograms.root
+else
+  echo "No makePlots script found. Check RecoLocalMuon/CSCValidation/macros for the right file in $CMSSWVERSION"  
+fi
 
 # Validation script produces ROOT files, copy them to eos
 ./copyFromCondorToSite.sh $(pwd) validation_histograms.root eoscms.cern.ch $OUTDIR valHists_$RUN.root 
