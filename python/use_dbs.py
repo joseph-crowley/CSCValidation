@@ -15,7 +15,9 @@ def get_files(dataset='', command='', runs=[]):
     r_keys = "file,run,lumi,events,dataset".split(',')
     retval = []
     for r in results:
-        retval.append(dict(zip(r_keys, r.split(' '))))
+        res = dict(zip(r_keys, r.split(' ')))
+        if 'events' in res.keys():
+            retval.append(res)
     return retval
 
 def get_blocks(dataset='', command='', min_cdate=''):
