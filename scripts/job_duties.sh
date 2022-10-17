@@ -24,8 +24,8 @@ cd $JOBDIR
 
 mkdir RUNDIR
 mv validation_cfg.py RUNDIR/
-mv /RecoLocalMuon/CSCValidation/macros/makePlots.C RUNDIR/  
-mv /RecoLocalMuon/CSCValidation/macros/myFunctions.C RUNDIR/  
+mv $CMSSWVERSION/src/RecoLocalMuon/CSCValidation/macros/makePlots.C RUNDIR/  
+mv $CMSSWVERSION/src/RecoLocalMuon/CSCValidation/macros/myFunctions.C RUNDIR/  
 mv copyFromCondorToSite.sh RUNDIR/
 cd RUNDIR
 
