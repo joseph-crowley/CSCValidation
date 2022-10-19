@@ -86,9 +86,9 @@ def run_validation(config):
     os.chdir(rundir)
     
     # copy over the necessary files
-    os.system('ln -sf '+basedir+'/scripts/copyFromCondorToSite.sh {}/'.format(rundir))
-    os.system('ln -sf '+basedir+'/RecoLocalMuon.tar {}/'.format(rundir))
-    os.system('cp -f '+basedir+'/scripts/job_duties.sh {}/'.format(rundir))
+    #os.system('ln -sf '+basedir+'/scripts/copyFromCondorToSite.sh {}/'.format(rundir))
+    #os.system('ln -sf '+basedir+'/RecoLocalMuon.tar {}/'.format(rundir))
+    #os.system('cp -f '+basedir+'/scripts/job_duties.sh {}/'.format(rundir))
 
     # currently only support RAW eventContent
     if eventContent != 'RAW':
@@ -115,6 +115,19 @@ def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_B
 
     with open(rundir+'/validation_cfg.py','w') as f:
         f.write(validation_cfg)
+
+    # replace template parameters in job.sub
+    with open(basedir+'/scripts/job_duties.sh','r') as f:
+        job_duties = f.read()
+   
+    # format the input files for the ESSource in the validation_cfg
+    input_files_str = "', '".join(input_files)
+
+    job_duties = job_duties.replace('RUN_REPLACETAG', run)
+    job_duties = job_duties.replace('STREAM_REPLACETAG', stream)
+
+    with open(rundir+'/job_duties.sh','w') as f:
+        f.write(job_duties)
 
     # replace template parameters in job.sub
     with open(basedir+'/scripts/job.sub','r') as f:
