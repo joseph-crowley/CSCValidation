@@ -33,10 +33,11 @@ cd RUNDIR
 cmsRun validation_cfg.py
 
 # make the plots with the output
-./makePlots.sh validation_histograms.root
-
+#
+##########################################################################################
 ## note: there are two forms of this depending on CMSSW version. 
 ##       this script will evaluate whichever it finds first
+#
 #cFile=$(ls makePlots.C | wc -l)
 #shFile=$(ls makePlots.sh | wc -l)
 #
@@ -51,6 +52,13 @@ cmsRun validation_cfg.py
 #if [ $shFile -ne 1 && $cFile -ne 1]; then 
 #  echo "No makePlots script found. Check RecoLocalMuon/CSCValidation/macros for the right file in $CMSSWVERSION"  
 #fi
+##########################################################################################
+
+# fix the run bug in the myFunctions.C file
+cat myFunctions.C | sed -e "s/t2 = t2 + \" (run \" + run + \")\";/t2 = t2 + \" (run \" + 1234 + \")\";/g" | tee myFunctions.C
+
+./makePlots.sh validation_histograms.root
+
 
 # Validation script produces ROOT files, copy them to eos
 ./copyFromCondorToSite.sh $(pwd) validation_histograms.root eoscms.cern.ch $OUTDIR valHists_$RUN.root 
