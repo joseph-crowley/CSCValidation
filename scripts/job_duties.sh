@@ -55,7 +55,7 @@ cmsRun validation_cfg.py
 ##########################################################################################
 
 # fix the run bug in the myFunctions.C file
-cat myFunctions.C | sed -e "s/t2 = t2 + \" (run \" + run + \")\";/t2 = t2 + \" (run \" + 1234 + \")\";/g" | tee myFunctions.C
+cat myFunctions.C | sed -e "s/t2 = t2 + \" (run \" + run + \")\";/t2 = t2 + \" (run \" + $RUN + \")\";/g" | tee myFunctions.C
 
 ./makePlots.sh validation_histograms.root
 
