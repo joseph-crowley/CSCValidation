@@ -86,9 +86,9 @@ def run_validation(config):
     os.chdir(rundir)
     
     # copy over the necessary files
-    #os.system('ln -sf '+basedir+'/scripts/copyFromCondorToSite.sh {}/'.format(rundir))
-    #os.system('ln -sf '+basedir+'/RecoLocalMuon.tar {}/'.format(rundir))
-    #os.system('cp -f '+basedir+'/scripts/job_duties.sh {}/'.format(rundir))
+    os.system('ln -sf '+basedir+'/scripts/copyFromCondorToSite.sh {}/'.format(rundir))
+    os.system('ln -sf '+basedir+'/RecoLocalMuon.tar {}/'.format(rundir))
+    os.system('cp -f '+basedir+'/scripts/job_duties.sh {}/'.format(rundir))
 
     # currently only support RAW eventContent
     if eventContent != 'RAW':
