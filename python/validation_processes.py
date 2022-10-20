@@ -96,11 +96,11 @@ def run_validation(config):
         return 
 
     # fill the templates in the rundir for the job
-    replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_BASE, run, stream, jobtag)
+    replace_template_parameters(basedir, input_files, dataset, globaltag, rundir, CMSSW_BASE, run, stream, jobtag)
     # submit the job
     os.system('condor_submit '+rundir+'/job.sub')
 
-def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_BASE, run, stream, jobtag, n_events=100):
+def replace_template_parameters(basedir, input_files, dataset, globaltag, rundir, CMSSW_BASE, run, stream, jobtag, n_events=100):
     # replace template parameters in validation_cfg
     with open(basedir+'/python/validation_cfg.py','r') as f:
         validation_cfg = f.read()
@@ -145,8 +145,21 @@ def replace_template_parameters(basedir, input_files, globaltag, rundir, CMSSW_B
 
     with open(rundir+'/job.sub','w') as f:
         f.write(job_sub)
-    
 
+    # replace template parameters in Summary.html
+    with open(basedir+'/html/summary.html','r') as f:
+        summary_html = f.read()
+
+    summary_html = summary_html.replace('CMSSWVERSION_REPLACETAG', os.getenv("CMSSW_VERSION"))
+    summary_html = summary_html.replace('DATASET_REPLACETAG', dataset)
+    summary_html = summary_html.replace('RUN_REPLACETAG', run)
+    summary_html = summary_html.replace('NEVENTS_REPLACETAG', str(n_events))
+    summary_html = summary_html.replace('GLOBALTAG_REPLACETAG', globaltag)
+    summary_html = summary_html.replace('DATEIME_REPLACETAG', time.strftime("%a, %d %b %Y %H:%M:%S"))
+
+    with open(rundir+'/Summary.html','w') as f:
+        f.write(summary_html)
+    
 def initialize_validation(stream):
     # setup working directory for stream
     CMSSW_BASE = os.getenv('CMSSW_BASE')
