@@ -27,6 +27,7 @@ mv validation_cfg.py RUNDIR/
 mv $JOBDIR/RecoLocalMuon/CSCValidation/macros/makePlots.* RUNDIR/  
 #mv $JOBDIR/RecoLocalMuon/CSCValidation/macros/myFunctions.C RUNDIR/  
 mv copyFromCondorToSite.sh RUNDIR/
+mv Summary.html RUNDIR/
 cd RUNDIR
 
 # execute the validation
