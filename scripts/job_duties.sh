@@ -25,7 +25,7 @@ cd $JOBDIR
 mkdir RUNDIR
 mv validation_cfg.py RUNDIR/
 mv $JOBDIR/RecoLocalMuon/CSCValidation/macros/makePlots.* RUNDIR/  
-mv $JOBDIR/RecoLocalMuon/CSCValidation/macros/myFunctions.C RUNDIR/  
+#mv $JOBDIR/RecoLocalMuon/CSCValidation/macros/myFunctions.C RUNDIR/  
 mv copyFromCondorToSite.sh RUNDIR/
 cd RUNDIR
 
@@ -55,7 +55,8 @@ cmsRun validation_cfg.py
 ##########################################################################################
 
 # fix the run bug in the myFunctions.C file
-cat myFunctions.C | sed -e "s/t2 = t2 + \" (run \" + run + \")\";/t2 = t2 + \" (run \" + $RUN + \")\";/g" | tee myFunctions.C
+wget https://raw.githubusercontent.com/cms-sw/cmssw/master/RecoLocalMuon/CSCValidation/macros/myFunctions.C
+#cat myFunctions.C | sed -e "s/t2 = t2 + \" (run \" + run + \")\";/t2 = t2 + \" (run \" + $RUN + \")\";/g" | tee myFunctions.C
 
 ./makePlots.sh validation_histograms.root
 
