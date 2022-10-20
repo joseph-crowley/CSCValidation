@@ -90,10 +90,10 @@ def run_validation(config):
     os.system('ln -sf '+basedir+'/RecoLocalMuon.tar {}/'.format(rundir))
     os.system('cp -f '+basedir+'/scripts/job_duties.sh {}/'.format(rundir))
 
-    # currently only support RAW eventContent
-    if eventContent != 'RAW':
-        print(f'Validation for dataset {datset} failed. Only eventContent currently supported is RAW')
-        return 
+    ## currently only support RAW eventContent
+    #if eventContent != 'RAW':
+    #    print(f'Validation for dataset {dataset} failed. Only eventContent currently supported is RAW')
+    #    return 
 
     # fill the templates in the rundir for the job
     replace_template_parameters(basedir, input_files, dataset, globaltag, rundir, CMSSW_BASE, run, stream, jobtag)
