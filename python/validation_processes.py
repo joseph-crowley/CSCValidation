@@ -22,23 +22,30 @@ def get_from_dataset(dataset, streamQ=True, versionQ=False, eventContentQ=True):
         stream = stream+version.replace("_","")
     return [s for s, b in zip([stream,version,eventContent], [streamQ,versionQ,eventContentQ]) if b]
 
+# TODO: finish working on this function
 def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc/cscval/www'):
     '''
     Check the files on eos to determine which runs have been processed, and update the 
     runlist.json file. 
     '''
-    # TODO: FINISH THIS FUNCTION
     # get a voms proxy
     import getVOMSProxy as voms
     X509_USER_PROXY, username = voms.getVOMSProxy()
     use_proxy = f'env -i X509_USER_PROXY={X509_USER_PROXY}'
 
-    # retrieve the last run
+    # retrieve the last run time
     cmd = f'{use_proxy} gfal-copy -f {web_dir}/js/lastrun.json lastrun.json'
     os.system(cmd)
 
-    with open('lastrun.json') as f:
-        lastrun = json.load(f)
+    # TODO: lastrun.json is not truly in json format. Check out anything that uses it, and change it 
+    #       to be json format. I left it unchanged because I'm not sure what else is using it. -JC 10/24/22
+    with open('lastrun.json', 'r') as f:
+        ## it could be so simple:
+        #lastrun = json.load(f)
+
+        ## but with this format
+        tmp = f.read()
+        lastrun = json.loads(tmp[14:]) # TODO: fix lastrun.json formatting so that it really is json
 
     date_format = "%Y/%m/%d %H:%M:%S"
     default_start_time = '2022/10/24 16:20:00'
@@ -51,6 +58,27 @@ def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc
     # check eos for processed runs 
     cmd = f'{use_proxy} gfal-ls {web_dir}/results | grep "run[0-9][0-9]"'
     run_dirs = subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')
+    for d in run_dirs:
+        # TODO: build the summary based on the processed runs with their Summary.html file
+        summary = {}
+
+    # reset the last run time to now
+    # TODO: lastrun.json is not truly in json format. Check out anything that uses it, and change it 
+    #       to be json format. I left it unchanged because I'm not sure what else is using it. -JC 10/24/22
+    with open('lastrun.json','w') as f:
+        ## it could be so simple:
+        #json.dump(lastrun,f)
+
+        ## but with this format
+        f.write('var lastrun = ') # TODO: fix lastrun.json formatting so that it really is json
+        f.write('{\n  "lastrun" : ')
+        f.write(f'"{start_time}"'+'\n}')
+
+    # copy the lastrun file back over to the website
+    cmd = f'{use_proxy} gfal-copy -f lastrun.json {web_dir}/js/lastrun.json'
+    os.system(cmd)
+
+
 
 # TODO:
 def merge_outputs(config):
