@@ -13,6 +13,7 @@
 
 import time
 import os
+import subprocess
 import pandas as pd
 
 def get_from_dataset(dataset, streamQ=True, versionQ=False, eventContentQ=True):
@@ -21,27 +22,35 @@ def get_from_dataset(dataset, streamQ=True, versionQ=False, eventContentQ=True):
         stream = stream+version.replace("_","")
     return [s for s, b in zip([stream,version,eventContent], [streamQ,versionQ,eventContentQ]) if b]
 
-def build_runlist():
-    # TODO: document and perhaps rename build_runlist
+def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc/cscval/www'):
+    '''
+    Check the files on eos to determine which runs have been processed, and update the 
+    runlist.json file. 
+    '''
+    # TODO: FINISH THIS FUNCTION
+    # get a voms proxy
+    import getVOMSProxy as voms
+    X509_USER_PROXY, username = voms.getVOMSProxy()
+    use_proxy = f'env -i X509_USER_PROXY={X509_USER_PROXY}'
 
-    Time = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
-    tstamp = time.strftime("%H%M%S", time.localtime())
+    # retrieve the last run
+    cmd = f'{use_proxy} gfal-copy -f {web_dir}/js/lastrun.json lastrun.json'
+    os.system(cmd)
 
-    print(f"[{Time}] Building runlist for afs", file=sys.stderr)
-    os.system(f'bash generateRunList.sh /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results > temp_afs_runlist_{tstamp}.json')
-    os.system('mv temp_afs_runlist_{tstamp}.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/runlist.json')
+    with open('lastrun.json') as f:
+        lastrun = json.load(f)
 
-    print("[{Time}] Building runlist for eos", file=sys.stderr)
-    os.system(f'bash generateRunList.sh > temp_eos_runlist_{tstamp}.json')
-    os.system(f'cat temp_eos_runlist_{tstamp}.json > /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/js/runlist.json')
-    os.system(f'rm temp_eos_runlist_{tstamp}.json')
+    date_format = "%Y/%m/%d %H:%M:%S"
+    default_start_time = '2022/10/24 16:20:00'
 
-    # create last run json
-    with open('lastrun.json','w') as file:
-        file.write('var lastrun = {\n  "lastrun" : "%s"\n}\n' % Time)
+    start_time = time.strftime(date_format)
 
-    os.system('cat lastrun.json > /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/js/lastrun.json')
-    os.system('mv lastrun.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/')
+    last_run_time = lastrun.get('lastrun', default_start_time)
+    print(f'Last web update: {last_run_time}')
+
+    # check eos for processed runs 
+    cmd = f'{use_proxy} gfal-ls {web_dir}/results | grep "run[0-9][0-9]"'
+    run_dirs = subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')
 
 # TODO:
 def merge_outputs(config):
