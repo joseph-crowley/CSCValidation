@@ -33,51 +33,90 @@ def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc
     X509_USER_PROXY, username = voms.getVOMSProxy()
     use_proxy = f'env -i X509_USER_PROXY={X509_USER_PROXY}'
 
-    # retrieve the last run time
-    cmd = f'{use_proxy} gfal-copy -f {web_dir}/js/lastrun.json lastrun.json'
+    ## retrieve the runlist and last run time
+
+    # set up last run time, set new time to now
+    cmd = f'{use_proxy} gfal-copy -f {web_dir}/js/last_run.json last_run.json'
     os.system(cmd)
-
-    # TODO: lastrun.json is not truly in json format. Check out anything that uses it, and change it 
-    #       to be json format. I left it unchanged because I'm not sure what else is using it. -JC 10/24/22
-    with open('lastrun.json', 'r') as f:
-        ## it could be so simple:
-        #lastrun = json.load(f)
-
-        ## but with this format
-        tmp = f.read()
-        lastrun = json.loads(tmp[14:]) # TODO: fix lastrun.json formatting so that it really is json
-
+    with open('last_run.json', 'r') as f:
+        lastrun = json.load(f)
     date_format = "%Y/%m/%d %H:%M:%S"
     default_start_time = '2022/10/24 16:20:00'
-
     start_time = time.strftime(date_format)
-
     last_run_time = lastrun.get('lastrun', default_start_time)
     print(f'Last web update: {last_run_time}')
 
-    # check eos for processed runs 
+    # set up the runlist
+    cmd = f'{use_proxy} gfal-copy -f {web_dir}/js/run_list.json run_list.json'
+    os.system(cmd)
+    with open('run_list.json','r') as f:
+        run_list = json.load(f)
+
+    ## check eos for processed runs not in the runlist
     cmd = f'{use_proxy} gfal-ls {web_dir}/results | grep "run[0-9][0-9]"'
     run_dirs = subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')
-    for d in run_dirs:
-        # TODO: build the summary based on the processed runs with their Summary.html file
-        summary = {}
+
+    unlisted_dirs = [d for d in run_dirs if d[3:] not in run_list.keys()]
+    
+    create_runlist_json(unlisted_dirs, web_dir, use_proxy)
 
     # reset the last run time to now
-    # TODO: lastrun.json is not truly in json format. Check out anything that uses it, and change it 
-    #       to be json format. I left it unchanged because I'm not sure what else is using it. -JC 10/24/22
-    with open('lastrun.json','w') as f:
-        ## it could be so simple:
-        #json.dump(lastrun,f)
-
-        ## but with this format
-        f.write('var lastrun = ') # TODO: fix lastrun.json formatting so that it really is json
-        f.write('{\n  "lastrun" : ')
-        f.write(f'"{start_time}"'+'\n}')
+    with open('last_run.json','w') as f:
+        lastrun.update({'lastrun':start_time})
+        json.dump(lastrun, f, indent=4)
 
     # copy the lastrun file back over to the website
-    cmd = f'{use_proxy} gfal-copy -f lastrun.json {web_dir}/js/lastrun.json'
+    cmd = f'{use_proxy} gfal-copy -f last_run.json {web_dir}/js/last_run.json'
     os.system(cmd)
 
+    cmd = f'{use_proxy} gfal-copy -f run_list.json {web_dir}/js/run_list.json'
+    os.system(cmd)
+
+def create_runlist_json(unlisted_runs, web_dir, use_proxy)
+    # load runlist json
+    with open('run_list.json','r') as f:
+        run_list = json.load(f)
+
+    for run in unlisted_runs:
+        summary = {}
+
+        cmd = f'{use_proxy} gfal-ls {web_dir}/results/{run}/'
+        datasets = subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')
+
+        for dataset in datasets:
+            # check if the summary exists
+            # summary can be json,html, or both
+            summary_remotefilepath = f'{web_dir}/results/{run}/{dataset}/Site/Summary'
+            summary_fname = f'summary_{dataset}_{run}'
+
+            # json
+            cmd = f'{use_proxy} gfal-copy -f {summary_remotefilepath}.json {summary_fname}.json'
+            os.system(cmd)
+
+            # html
+            cmd = f'{use_proxy} gfal-copy -f {summary_remotefilepath}.html {summary_fname}.html'
+            os.system(cmd)
+
+            if os.path.exists(f'{summary_fname}.json'):
+                with open(fname+'.json', 'r') as f:
+                    summary = json.load(f)
+
+            elif os.path.exists(f'{summary_fname}.html'):
+                with open(f'{summary_fname}.html', 'r') as f:
+                    summary_str  = f.read()
+                    summary_str  = summary_str.decode('ascii')
+                summary = parse_html(summary_str)
+
+            else:
+                print(f'Directory {run} has no summary file and will be skipped.')
+                continue
+
+            # update with new runs
+            run_list.update(summary)
+
+    # dump runlist json
+    with open('run_list.json','w') as f:
+        json.dump(run_list, f, indent=4)
 
 
 # TODO:
