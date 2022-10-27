@@ -58,7 +58,7 @@ def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc
 
     unlisted_dirs = [d for d in run_dirs if d[3:] not in run_list.keys()]
     
-    create_runlist_json(unlisted_dirs, web_dir, use_proxy)
+    create_runlist_json(unlisted_dirs[-5:], web_dir, use_proxy)
 
     # reset the last run time to now
     with open('last_run.json','w') as f:
@@ -72,7 +72,7 @@ def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc
     cmd = f'{use_proxy} gfal-copy -f run_list.json {web_dir}/js/run_list.json'
     os.system(cmd)
 
-def create_runlist_json(unlisted_runs, web_dir, use_proxy)
+def create_runlist_json(unlisted_runs, web_dir, use_proxy):
     # load runlist json
     with open('run_list.json','r') as f:
         run_list = json.load(f)
@@ -81,11 +81,13 @@ def create_runlist_json(unlisted_runs, web_dir, use_proxy)
         summary = {}
 
         cmd = f'{use_proxy} gfal-ls {web_dir}/results/{run}/'
-        datasets = subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')
+        datasets = [d for d in subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')[:-1]]
 
         for dataset in datasets:
+            if 'tar' in dataset:
+                continue
             # check if the summary exists
-            # summary can be json,html, or both
+            # summary can be json,html, or both, so filetype is excluded from path
             summary_remotefilepath = f'{web_dir}/results/{run}/{dataset}/Site/Summary'
             summary_fname = f'summary_{dataset}_{run}'
 
