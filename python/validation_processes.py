@@ -22,7 +22,6 @@ def get_from_dataset(dataset, streamQ=True, versionQ=False, eventContentQ=True):
         stream = stream+version.replace("_","")
     return [s for s, b in zip([stream,version,eventContent], [streamQ,versionQ,eventContentQ]) if b]
 
-# TODO: finish working on this function
 def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc/cscval/www'):
     '''
     Check the files on eos to determine which runs have been processed, and update the 
@@ -56,9 +55,12 @@ def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc
     cmd = f'{use_proxy} gfal-ls {web_dir}/results | grep "run[0-9][0-9]"'
     run_dirs = subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')
 
-    unlisted_dirs = [d for d in run_dirs if d[3:] not in run_list.keys()]
+    # TODO: smart building of runlist by runXXXXX/datasets/dataset
+    #unlisted_dirs = [d for d in run_dirs if d[3:] not in run_list.keys()]
+    unlisted_dirs = run_dirs
     
-    create_runlist_json(unlisted_dirs[-5:], web_dir, use_proxy)
+    # make the json file
+    create_runlist_json([u for u in unlisted_dirs if u], web_dir, use_proxy)
 
     # reset the last run time to now
     with open('last_run.json','w') as f:
@@ -67,37 +69,61 @@ def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc
 
     # copy the lastrun file back over to the website
     cmd = f'{use_proxy} gfal-copy -f last_run.json {web_dir}/js/last_run.json'
-    os.system(cmd)
+    print(cmd)
+    #os.system(cmd)
 
     cmd = f'{use_proxy} gfal-copy -f run_list.json {web_dir}/js/run_list.json'
-    os.system(cmd)
+    print(cmd)
+    #os.system(cmd)
 
 def create_runlist_json(unlisted_runs, web_dir, use_proxy):
-    # load runlist json
-    with open('run_list.json','r') as f:
-        run_list = json.load(f)
+    from parsingtools import parse_summary_html
+    unlisted_runs = ['run360413']
+    for run in unlisted_runs[::-1]:
+        print(f'checking run {run}')
 
-    for run in unlisted_runs:
+        # load runlist json
+        with open('run_list.json','r') as f:
+            run_list = json.load(f)
+
         summary = {}
 
         cmd = f'{use_proxy} gfal-ls {web_dir}/results/{run}/'
         datasets = [d for d in subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')[:-1]]
 
         for dataset in datasets:
-            if 'tar' in dataset:
-                continue
+            dataset_path = f'{web_dir}/results/{run}/{dataset}'
+
+            print(f'checking dataset {dataset_path}')
+            if 'tar' in dataset: continue
+
+            # check if there are any CSC plots with an example
+            cscplot = f'{dataset_path}/Site/PNGS/hORecHitsSerial.png'
+            cmd = f'{use_proxy} gfal-ls {cscplot}'
+
+            try:
+                cscplots = subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')[:-1]
+            except subprocess.CalledProcessError as err:
+                print(f'Error: {err.args[0]}')
+                cscplots = []
+
+            if not cscplots: continue
+
             # check if the summary exists
             # summary can be json,html, or both, so filetype is excluded from path
-            summary_remotefilepath = f'{web_dir}/results/{run}/{dataset}/Site/Summary'
+            summary_remotefilepath = f'{dataset_path}/Site'
             summary_fname = f'summary_{dataset}_{run}'
 
-            # json
-            cmd = f'{use_proxy} gfal-copy -f {summary_remotefilepath}.json {summary_fname}.json'
-            os.system(cmd)
+            cmd = f'{use_proxy} gfal-ls {summary_remotefilepath} | grep Summary'
+            try:
+                summary_files = subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')[:-1]
+            except subprocess.CalledProcessError as err:
+                print(f'Error: {err.args[0]}')
+                summary_files = []
 
-            # html
-            cmd = f'{use_proxy} gfal-copy -f {summary_remotefilepath}.html {summary_fname}.html'
-            os.system(cmd)
+            for summary_file in summary_files:
+                cmd = f'{use_proxy} gfal-copy -f {summary_remotefilepath}/{summary_file} {summary_fname}.{summary_file[-4:]}'
+                os.system(cmd)
 
             if os.path.exists(f'{summary_fname}.json'):
                 with open(fname+'.json', 'r') as f:
@@ -106,20 +132,30 @@ def create_runlist_json(unlisted_runs, web_dir, use_proxy):
             elif os.path.exists(f'{summary_fname}.html'):
                 with open(f'{summary_fname}.html', 'r') as f:
                     summary_str  = f.read()
-                    summary_str  = summary_str.decode('ascii')
-                summary = parse_html(summary_str)
+                summary = parse_summary_html(summary_str)
 
             else:
                 print(f'Directory {run} has no summary file and will be skipped.')
                 continue
 
             # update with new runs
-            run_list.update(summary)
+            run_number = run[3:]
+            
+            # check if there exists a dataset summary already
+            try:
+                existing_summary = run_list[run_number]['datasets']
+            except KeyError as err:
+                existing_summary = {}
+            
+            updated_summary = {}
+            updated_summary.update(existing_summary)
+            updated_summary = {dataset:summary}
 
-    # dump runlist json
-    with open('run_list.json','w') as f:
-        json.dump(run_list, f, indent=4)
+            run_list.update({run_number:{"datasets":updated_summary}})
 
+        # dump runlist json
+        with open('run_list.json','w') as f:
+            json.dump(run_list, f, indent=4)
 
 # TODO:
 def merge_outputs(config):

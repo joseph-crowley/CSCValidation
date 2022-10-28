@@ -1,7 +1,9 @@
 #! /usr/bin/env python3
 
 ##########################################################################################
-# Parse command line arguments for CSCValidation 
+# Parsing tools for use with CSCValidation: 
+#     command line arguments 
+#     html summary files 
 #
 # Authors
 #   Joe Crowley, UC Santa Barbara
@@ -52,6 +54,44 @@ def parse_args(return_dict=False):
         return dict(args.__dict__)
 
     return args
+
+from html.parser import HTMLParser
+from html.entities import name2codepoint
+import string
+
+class MyHTMLParser(HTMLParser):
+    def handle_data(self, data):
+        if data.strip() and data[0] != '<':
+            self.summary_str += data
+            self.summary_str += ','
+            self.summary_str = self.summary_str.replace(':,',':')
+
+    summary_str = ''
+    keymap = {
+                "Release" : "release",
+                "Dataset" : "datasetname",
+                "Run" : "runnum",
+                "# of Events Processed" : "events",
+                "Using GlobalTag" : "globaltag",
+                "CSCValidation was run on " : "rundate"
+             }
+
+def parse_summary_html(html_str): 
+    parser = MyHTMLParser()
+    parser.feed(html_str)
+    
+    summary = parser.summary_str
+    summary_dict = {}
+    horrible_choice = 'CSCValidation was run on '
+    for s in summary.split(','):
+        ss = s.split(':')
+        if len(ss) == 2:
+            summary_dict.update({parser.keymap[ss[0]]:ss[1]})
+        elif horrible_choice in s:  
+            v = s.replace(horrible_choice,'')
+            summary_dict.update({parser.keymap[horrible_choice]:v})
+    return summary_dict
+
 
 if __name__ == '__main__':
     args = parse_args()
