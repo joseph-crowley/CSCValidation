@@ -14,6 +14,7 @@
 import time
 import os
 import subprocess
+import json
 import pandas as pd
 
 def get_from_dataset(dataset, streamQ=True, versionQ=False, eventContentQ=True):
@@ -76,26 +77,31 @@ def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc
     print(cmd)
     #os.system(cmd)
 
-def create_runlist_json(unlisted_runs, web_dir, use_proxy):
+def create_runlist_json(runs, web_dir, use_proxy):
     from parsingtools import parse_summary_html
-    unlisted_runs = ['run360413']
-    for run in unlisted_runs[::-1]:
-        print(f'checking run {run}')
 
-        # load runlist json
-        with open('run_list.json','r') as f:
-            run_list = json.load(f)
+    # load runlist json
+    with open('run_list.json','r') as f:
+        run_list = json.load(f)
+
+    for run in runs[::-1]:
+        run_number = run[3:]
+        print(f'\nBuilding summary for run {run_number}')
 
         summary = {}
+        if run_number in run_list.keys():
+            exclude = run_list[run_number]["datasets"].keys()
+            print(f'    Found existing summaries for datasets {list(exclude)}. Will not overwrite.')
+        else:
+            exclude = []
 
         cmd = f'{use_proxy} gfal-ls {web_dir}/results/{run}/'
-        datasets = [d for d in subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')[:-1]]
+        datasets = [d for d in subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')[:-1] if d not in exclude and 'tar' not in d]
 
         for dataset in datasets:
             dataset_path = f'{web_dir}/results/{run}/{dataset}'
 
-            print(f'checking dataset {dataset_path}')
-            if 'tar' in dataset: continue
+            print(f'    dataset {dataset_path}')
 
             # check if there are any CSC plots with an example
             cscplot = f'{dataset_path}/Site/PNGS/hORecHitsSerial.png'
@@ -103,8 +109,8 @@ def create_runlist_json(unlisted_runs, web_dir, use_proxy):
 
             try:
                 cscplots = subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')[:-1]
-            except subprocess.CalledProcessError as err:
-                print(f'Error: {err.args[0]}')
+            except subprocess.CalledProcessError:
+                print(f'    Error: could not find CSC plots for run {run_number}. skip to next run.')
                 cscplots = []
 
             if not cscplots: continue
@@ -139,7 +145,6 @@ def create_runlist_json(unlisted_runs, web_dir, use_proxy):
                 continue
 
             # update with new runs
-            run_number = run[3:]
             
             # check if there exists a dataset summary already
             try:
@@ -147,9 +152,11 @@ def create_runlist_json(unlisted_runs, web_dir, use_proxy):
             except KeyError as err:
                 existing_summary = {}
             
+            # rewrite existing summary for re-run dataset
+            # add summary for new dataset
             updated_summary = {}
             updated_summary.update(existing_summary)
-            updated_summary = {dataset:summary}
+            updated_summary.update({dataset:summary})
 
             run_list.update({run_number:{"datasets":updated_summary}})
 
