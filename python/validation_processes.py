@@ -167,6 +167,6 @@ def initialize_validation(stream):
             procTimes = file.readlines()
     procTimes = [x.rstrip() for x in procTimes]
     prevTime = float(procTimes[-1]) - 12*60*60 if procTimes else float(time.time()) - 7*24*60*60 # default to 7 days before now or 12 hours before last run
-    prevdate = time.strftime(date_format, prevTime)
+    prevdate = pd.to_datetime(prevTime, unit='s').strftime(date_format)
     print(f'Last run: {prevdate}')
 
