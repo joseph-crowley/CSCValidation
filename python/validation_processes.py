@@ -135,7 +135,7 @@ def replace_template_parameters(basedir, input_files, dataset, globaltag, rundir
 
     with open(rundir+'/summary.json','w') as f:
         from parsingtools import parse_summary_html
-        summary = parse_summary_html(summary_str)
+        summary = parse_summary_html(summary_html)
         json.dump(summary,f)
     
 def initialize_validation(stream):
