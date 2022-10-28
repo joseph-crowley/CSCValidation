@@ -13,7 +13,7 @@ import subprocess
 import os
 from parsingtools import parse_summary_html
 
-def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc/cscval/www'):
+def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc/cscval/www',runs_to_update=[]):
     '''
     Check the files on eos to determine which runs have been processed, and update the 
     runlist.json file. 
@@ -43,12 +43,15 @@ def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc
         run_list = json.load(f)
 
     ## check eos for processed runs not in the runlist
-    cmd = f'{use_proxy} gfal-ls {web_dir}/results | grep "run[0-9][0-9]"'
-    run_dirs = subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')
+    if runs_to_update:
+        unlisted_dirs = runs_to_update
+    else:
+        cmd = f'{use_proxy} gfal-ls {web_dir}/results | grep "run[0-9][0-9]"'
+        run_dirs = subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')
 
-    # TODO: smart building of runlist by runXXXXX/datasets/dataset
-    #unlisted_dirs = [d for d in run_dirs if d[3:] not in run_list.keys()]
-    unlisted_dirs = run_dirs
+        # TODO: smart building of runlist by runXXXXX/datasets/dataset
+        #unlisted_dirs = [d for d in run_dirs if d[3:] not in run_list.keys()]
+        unlisted_dirs = run_dirs
     
     # make the json file
     create_runlist_json([u for u in unlisted_dirs if u], web_dir, use_proxy)

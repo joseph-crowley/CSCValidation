@@ -77,15 +77,15 @@ def submit_validation_jobs(config):
             eventRunMap[run] = sum([sum(eval(f['events'])) for f in files if int(f['run'])==run])
             fileRunMap[run] = [f['file'] for f in files if int(f['run'])==run]
 
-        runsToUpdate = [run for run in updatedRuns if fileRunMap[run] and eventRunMap[run]>25000]
+        runs_to_update = [run for run in updatedRuns if fileRunMap[run] and eventRunMap[run]>25000]
         if "GEN" in dataset: 
-            runsToUpdate = [run for run in updatedRuns if fileRunMap[run]]
+            runs_to_update = [run for run in updatedRuns if fileRunMap[run]]
 
         print('Runs to update:')
-        for run in runsToUpdate:
+        for run in runs_to_update:
             print(f'    Run {run}: {len(fileRunMap[run])} files, {eventRunMap[run]} events')
 
-        for run in runsToUpdate:
+        for run in runs_to_update:
             if int(run)<MINRUN: continue
             config_tmp = config.copy()
             config_tmp.update({"runNumber":str(run)})
@@ -93,13 +93,18 @@ def submit_validation_jobs(config):
             config_tmp.update({"input_files":fileRunMap[run]})
             print(f"Processing run {run}")
             run_validation(config_tmp)
+    return runs_to_update
 
 def main():
     import parsingtools as parser
     config = parser.parse_args(return_dict=True)
 
     if config["buildRunList"]:
-        build_runlist()
+        runs_to_update = []
+        if os.path.exists('runs_to_update.tmp'):
+            with open('runs_to_update.tmp','r') as f:
+                runs_to_update = eval(f.read())
+        build_runlist(runs_to_update = runs_to_update)
         return 
 
     if config["retrieveOutput"]:
@@ -108,7 +113,9 @@ def main():
         build_runlist()
         return 
 
-    submit_validation_jobs(config)
+    runs_to_update = submit_validation_jobs(config)
+    with open('runs_to_update.tmp','w') as f:
+        f.write(str(runs_to_update))
 
 if __name__ == "__main__":
     main()
