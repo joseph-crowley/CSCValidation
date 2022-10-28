@@ -13,7 +13,7 @@
 import time
 import os
 
-from validation_processes import build_runlist, merge_outputs, make_plots
+from webtools import build_runlist, merge_outputs, make_plots
 from validation_processes import get_from_dataset, initialize_validation, run_validation
 
 import use_dbs

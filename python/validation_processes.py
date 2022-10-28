@@ -164,14 +164,6 @@ def create_runlist_json(runs, web_dir, use_proxy):
         with open('run_list.json','w') as f:
             json.dump(run_list, f, indent=4)
 
-# TODO:
-def merge_outputs(config):
-    pass
-
-# TODO:
-def make_plots(config):
-    pass
-
 def run_validation(config):
     '''
       Create output directory structure and execute step one of validation routine (producing root files)
