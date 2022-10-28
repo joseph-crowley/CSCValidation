@@ -13,7 +13,8 @@
 import time
 import os
 
-from webtools import build_runlist, merge_outputs, make_plots
+from webtools import build_runlist
+from webtools import merge_outputs, make_plots
 from validation_processes import get_from_dataset, initialize_validation, run_validation
 
 import use_dbs
@@ -84,6 +85,7 @@ def submit_validation_jobs(config):
         for run in runsToUpdate:
             print(f'    Run {run}: {len(fileRunMap[run])} files, {eventRunMap[run]} events')
 
+        summary = {}
         for run in runsToUpdate[2:3]:
             if int(run)<MINRUN: continue
             config_tmp = config.copy()
@@ -92,7 +94,6 @@ def submit_validation_jobs(config):
             config_tmp.update({"input_files":fileRunMap[run]})
             print(f"Processing run {run}")
             run_validation(config_tmp)
-
 
 def main():
     import parsingtools as parser

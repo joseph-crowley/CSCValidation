@@ -68,8 +68,6 @@ def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc
     #os.system(cmd)
 
 def create_runlist_json(runs, web_dir, use_proxy):
-    from parsingtools import parse_summary_html
-
     # load runlist json
     with open('run_list.json','r') as f:
         run_list = json.load(f)

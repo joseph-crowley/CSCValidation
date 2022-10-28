@@ -67,5 +67,6 @@ wget https://raw.githubusercontent.com/cms-sw/cmssw/master/RecoLocalMuon/CSCVali
 
 # plots_and_graphs produces lots of images and a summary
 ./copyFromCondorToSite.sh $(pwd) Summary.html eoscms.cern.ch $SITEDIR Summary.html
+./copyFromCondorToSite.sh $(pwd) summary.json eoscms.cern.ch $SITEDIR summary.json
 ./copyFromCondorToSite.sh $(pwd) validation_cfg.py eoscms.cern.ch $IMGDIR config.py
 for img in $(ls *.png); do ./copyFromCondorToSite.sh $(pwd) $img eoscms.cern.ch $IMGDIR $img; done
