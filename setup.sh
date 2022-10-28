@@ -33,9 +33,3 @@ mv ../RecoLocalMuon.tar .
 
 # submit validation jobs
 python3 python/submit_validation_jobs.py $DATASET $GLOBALTAG
-
-# wait four hours
-sleep 14400
-
-# build run list
-python3 python/submit_validation_jobs.py $DATASET $GLOBALTAG -br
