@@ -16,6 +16,7 @@ import os
 import subprocess
 import json
 import pandas as pd
+date_format = "%Y/%m/%d %H:%M:%S"
 
 def get_from_dataset(dataset, streamQ=True, versionQ=False, eventContentQ=True):
     [stream, version, eventContent] = dataset.split('/')[1:]
@@ -128,7 +129,7 @@ def replace_template_parameters(basedir, input_files, dataset, globaltag, rundir
     summary_html = summary_html.replace('RUN_REPLACETAG', run)
     summary_html = summary_html.replace('NEVENTS_REPLACETAG', str(n_events))
     summary_html = summary_html.replace('GLOBALTAG_REPLACETAG', globaltag)
-    summary_html = summary_html.replace('DATETIME_REPLACETAG', time.strftime("%a, %d %b %Y %H:%M:%S"))
+    summary_html = summary_html.replace('DATETIME_REPLACETAG', time.strftime(date_format))
 
     with open(rundir+'/Summary.html','w') as f:
         f.write(summary_html)
@@ -146,7 +147,7 @@ def initialize_validation(stream):
         os.system('mkdir -p {}/outputs/processedRuns/{}'.format(basedir,stream))
 
     # begin running
-    start=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
+    start=time.strftime(date_format, time.localtime())
     print(f'CSCVal job initiated at {start}')
     os.chdir(basedir + '/outputs/processedRuns')
 
@@ -166,6 +167,6 @@ def initialize_validation(stream):
             procTimes = file.readlines()
     procTimes = [x.rstrip() for x in procTimes]
     prevTime = float(procTimes[-1]) - 12*60*60 if procTimes else float(time.time()) - 7*24*60*60 # default to 7 days before now or 12 hours before last run
-    prevdate = pd.to_datetime(prevTime, unit='s').strftime("%Y/%m/%d %H:%M:%S")
+    prevdate = time.strftime(date_format, prevTime)
     print(f'Last run: {prevdate}')
 
