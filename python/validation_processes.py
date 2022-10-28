@@ -128,14 +128,14 @@ def replace_template_parameters(basedir, input_files, dataset, globaltag, rundir
     summary_html = summary_html.replace('RUN_REPLACETAG', run)
     summary_html = summary_html.replace('NEVENTS_REPLACETAG', str(n_events))
     summary_html = summary_html.replace('GLOBALTAG_REPLACETAG', globaltag)
-    summary_html = summary_html.replace('DATEIME_REPLACETAG', time.strftime("%a, %d %b %Y %H:%M:%S"))
+    summary_html = summary_html.replace('DATETIME_REPLACETAG', time.strftime("%a, %d %b %Y %H:%M:%S"))
 
     with open(rundir+'/Summary.html','w') as f:
         f.write(summary_html)
 
+    from parsingtools import parse_summary_html
+    summary = parse_summary_html(summary_html)
     with open(rundir+'/summary.json','w') as f:
-        from parsingtools import parse_summary_html
-        summary = parse_summary_html(summary_html)
         json.dump(summary,f)
     
 def initialize_validation(stream):
