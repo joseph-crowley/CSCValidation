@@ -28,6 +28,7 @@ mv $JOBDIR/RecoLocalMuon/CSCValidation/macros/makePlots.* RUNDIR/
 #mv $JOBDIR/RecoLocalMuon/CSCValidation/macros/myFunctions.C RUNDIR/  
 mv copyFromCondorToSite.sh RUNDIR/
 mv Summary.html RUNDIR/
+mv summary.json RUNDIR/
 cd RUNDIR
 
 # execute the validation
@@ -61,11 +62,10 @@ wget https://raw.githubusercontent.com/cms-sw/cmssw/master/RecoLocalMuon/CSCVali
 
 ./makePlots.sh validation_histograms.root
 
-
 # Validation script produces ROOT files, copy them to eos
 ./copyFromCondorToSite.sh $(pwd) validation_histograms.root eoscms.cern.ch $OUTDIR valHists_$RUN.root 
 
-# plots_and_graphs produces lots of images and a summary
+# the job produces lots of images and a summary
 ./copyFromCondorToSite.sh $(pwd) Summary.html eoscms.cern.ch $SITEDIR Summary.html
 ./copyFromCondorToSite.sh $(pwd) summary.json eoscms.cern.ch $SITEDIR summary.json
 ./copyFromCondorToSite.sh $(pwd) validation_cfg.py eoscms.cern.ch $IMGDIR config.py
