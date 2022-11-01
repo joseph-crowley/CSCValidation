@@ -70,7 +70,7 @@ def run_validation(config):
     #    return 
 
     # fill the templates in the rundir for the job
-    replace_template_parameters(basedir, input_files, dataset, globaltag, rundir, CMSSW_BASE, run, stream, jobtag, n_events=max(n_events,10**6))
+    replace_template_parameters(basedir, input_files, dataset, globaltag, rundir, CMSSW_BASE, run, stream, jobtag, n_events=str(min(int(n_events),10**6)))
     # submit the job
     os.system('condor_submit '+rundir+'/job.sub')
 
