@@ -12,6 +12,7 @@ you will be prompted for a GRID passphrase; this is the one for your voms proxy
 this will run the CSC validation process on a dataset specified in setup.sh.
 
 outputs are in $CMSSWVERSION/src/CSCValidation/outputs/
+plots are displayed at the [CSC validation website](https://cms-conddb.cern.ch/eosweb/csc/)
 
 # documentation
 [block diagram](https://drive.google.com/file/d/1X_CnJtG0em5o13slPdH0YF1PPipN2SkT/view?usp=sharing) for running CSC validation
