@@ -17,3 +17,6 @@ outputs are in $CMSSWVERSION/src/CSCValidation/outputs/
 [block diagram](https://drive.google.com/file/d/1X_CnJtG0em5o13slPdH0YF1PPipN2SkT/view?usp=sharing) for running CSC validation
 
 cscval 2022 update [slides](https://docs.google.com/presentation/d/1xdZkySBoruQWN56ST2SQkPRaijjsJHeLGUNKfosaNlE/edit?usp=sharing)
+
+prompt reconstruction global tag can be found [here](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions#Global_Tags_for_Data_Taking)
+
