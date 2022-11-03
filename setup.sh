@@ -13,7 +13,7 @@
 ##########################################################################################
 
 CMSSWVERSION="CMSSW_12_4_9"
-DATASET="/MinimumBias/Run2022D-v1/RAW"
+DATASET="/Muon/Run2022E-v1/RAW"
 GLOBALTAG="124X_dataRun3_Prompt_v4"
 
 source /cvmfs/cms.cern.ch/cmsset_default.sh
@@ -33,3 +33,6 @@ mv ../RecoLocalMuon.tar .
 
 # submit validation jobs
 python3 python/submit_validation_jobs.py $DATASET $GLOBALTAG
+
+# build runlist
+python3 python/webtools.py
