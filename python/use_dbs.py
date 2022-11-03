@@ -1,3 +1,12 @@
+#! /usr/bin/env python3
+
+##########################################################################################
+# Use the CMS DAS Go client to retrieve files and blocks for a dataset
+#     dasgoclient URL: https://github.com/dmwm/dasgoclient
+#
+# Authors
+#   Joe Crowley, UC Santa Barbara
+##########################################################################################
 from cmseostools import cmsFileManip
 import pandas as pd 
 
@@ -24,6 +33,7 @@ def get_blocks(dataset='', command='', min_cdate=''):
     # min_cdate is given as an integer of the previous runtime 
     runner = cmsFileManip()
     command = '/cvmfs/cms.cern.ch/common/dasgoclient --limit=0 --query="block dataset=' + str(dataset) 
+    # TODO: implement min_cdate to only retrieve blocks after date
     #if min_cdate:
     #    date = pd.to_datetime(min_cdate, unit='s').strftime('%Y%m%d')
     #    today = pd.Timestamp.today().floor('D').strftime('%Y%m%d')
