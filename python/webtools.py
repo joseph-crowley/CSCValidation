@@ -185,7 +185,8 @@ def new_runs_list():
         # TODO: declutter the json files
         runnum = tmp["runnum"]
         datasetname = tmp["datasetname"].split("/")[1]
-        new_run_list.update({runnum:{'directory':str(runnum), 'datasets':{}}})
+        
+        new_run_list.get(runnum, {runnum:{'directory':str(runnum), 'datasets':{}}})
         new_run_list[runnum]['datasets'].update({datasetname:tmp})
         
     with open('updated_run_list.json','w') as f:
