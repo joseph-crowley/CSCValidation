@@ -162,3 +162,69 @@ def merge_outputs(config):
 # TODO:
 def make_plots(config):
     pass
+
+def new_runs_list():
+    '''
+    builds a local run list
+    run inside the same folder that setup.sh was run in 
+    '''
+    
+    cscvaldir = os.getenv('CSCVALDIR')
+    cmd = f'find {cscvaldir} |grep summary.json | tee new_runs'
+    files = subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')
+
+    new_run_list = {}
+    for f in files:
+        if not f: continue
+        tmp = {}
+    
+        with open(f,'r') as summary:
+            tmp = json.load(summary)
+        
+        # why would anyone choose this format?
+        # TODO: declutter the json files
+        runnum = tmp["runnum"]
+        datasetname = tmp["datasetname"].split("/")[1]
+        new_run_list.update({runnum:{'directory':str(runnum), 'datasets':{}}})
+        new_run_list[runnum]['datasets'].update({datasetname:tmp})
+        
+    with open('updated_run_list.json','w') as f:
+        json.dump(new_run_list,f, indent=4)
+
+def merge_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc/cscval/www'):
+    '''
+    given a local updated_run_list.json, retrieve the runlist.json and merge the lists, saving
+    the new runlist as updated_run_list.json at web_dir
+    '''
+    # get a voms proxy
+    import getVOMSProxy as voms
+    X509_USER_PROXY, username = voms.getVOMSProxy()
+    use_proxy = f'env -i X509_USER_PROXY={X509_USER_PROXY}'
+
+    ## retrieve the runlist and last run time
+
+    cmd = f'{use_proxy} gfal-copy -f {web_dir}/js/runlist.json runlist.json'
+    os.system(cmd)
+ 
+    with open('runlist.json','r') as f:
+        tmp = f.read()
+
+    runlist = json.loads(tmp[14:])
+    
+
+    with open('updated_run_list.json','r') as f:
+        new_runs = json.load(f)
+
+    runlist.update(new_runs)
+    
+    with open('updated_run_list.json','w') as f:
+        f.write('var runData = ') # TODO: declutter the json files
+        json.dump(runlist,f,indent = 4)
+    
+    # TODO: change the permissions of runlist.json to copy directly there
+    cmd = f'{use_proxy} gfal-copy -f updated_run_list.json {web_dir}/js/updated_run_list.json'
+    os.system(cmd)
+
+if __name__ == '__main__':
+    new_runs_list()
+    merge_runlist()
