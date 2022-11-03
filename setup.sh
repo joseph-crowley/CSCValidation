@@ -37,6 +37,6 @@ mv ../RecoLocalMuon.tar .
 python3 python/submit_validation_jobs.py $DATASET $GLOBALTAG
 
 # build runlist
-cd $INITIALDIR
 export CSCVALDIR=$(pwd)
-python3 $CMSSWVERSION/src/CSCValidation/python/webtools.py
+python3 python/webtools.py
+cp updated_run_list.json $INITIALDIR/updated_run_list_$CMSSWVERSION.json

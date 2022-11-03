@@ -227,7 +227,9 @@ def merge_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc
         json.dump(runlist,f,indent = 4)
     
     # TODO: change the permissions of runlist.json to copy directly there
-    cmd = f'{use_proxy} gfal-copy -f updated_run_list.json {web_dir}/js/updated_run_list.json'
+    date_format = "%Y%m%d_%H%M%S"
+    t0 = time.strftime(date_format)
+    cmd = f'{use_proxy} gfal-copy -f updated_run_list.json {web_dir}/js/updated_run_list_{t0}.json'
     os.system(cmd)
 
 if __name__ == '__main__':
