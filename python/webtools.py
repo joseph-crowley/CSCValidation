@@ -183,11 +183,15 @@ def new_runs_list():
         
         # why would anyone choose this format?
         # TODO: declutter the json files
-        runnum = tmp["runnum"]
+        runnum = str(tmp["runnum"])
         datasetname = tmp["datasetname"].split("/")[1]
         
-        new_run_list.get(runnum, {runnum:{'directory':str(runnum), 'datasets':{}}})
-        new_run_list[runnum]['datasets'].update({datasetname:tmp})
+        # get the old data, update the old data with new data  (overwrite for same run/dataset)
+        old_data = {runnum : new_run_list.get(runnum, {'directory':runnum, 'datasets':{}})}
+        print(old_data)
+        old_data[runnum]['datasets'].update({datasetname:tmp})
+        new_run_list.update(old_data)
+        
         
     with open('updated_run_list.json','w') as f:
         json.dump(new_run_list,f, indent=4)
