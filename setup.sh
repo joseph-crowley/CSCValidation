@@ -16,6 +16,8 @@ CMSSWVERSION="CMSSW_12_4_9"
 DATASET="/Muon/Run2022E-v1/RAW"
 GLOBALTAG="124X_dataRun3_Prompt_v4"
 
+INITIALDIR=$(pwd)
+
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 eval `scramv1 project CMSSW $CMSSWVERSION`
 cd $CMSSWVERSION/src
@@ -35,6 +37,6 @@ mv ../RecoLocalMuon.tar .
 python3 python/submit_validation_jobs.py $DATASET $GLOBALTAG
 
 # build runlist
-cd ..
+cd $INITIALDIR
 export CSCVALDIR=$(pwd)
-python3 CSCValidation/python/webtools.py
+python3 $CMSSWVERSION/src/CSCValidation/python/webtools.py
