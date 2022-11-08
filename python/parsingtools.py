@@ -84,12 +84,14 @@ def parse_summary_html(html_str):
     summary_dict = {}
     horrible_choice = 'CSCValidation was run on '
     for s in summary.split(','):
+        if not s: continue
+
         ss = s.split(':')
-        if len(ss) == 2:
-            summary_dict.update({parser.keymap[ss[0]]:ss[1]})
-        elif horrible_choice in s:  
+        if horrible_choice in s:  
             v = s.replace(horrible_choice,'')
             summary_dict.update({parser.keymap[horrible_choice]:v})
+        elif ss[0] in parser.keymap.keys():
+            summary_dict.update({parser.keymap[ss[0]]:ss[1]})
     return summary_dict
 
 
