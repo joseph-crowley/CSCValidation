@@ -54,7 +54,25 @@ def build_runlist(web_dir = 'root://eoscms.cern.ch//store/group/dpg_csc/comm_csc
         unlisted_dirs = run_dirs
     
     # make the json file
-    create_runlist_json([u for u in unlisted_dirs if u], web_dir, use_proxy)
+    # first sort out which dirs to add to the runlist
+    RUN3_BEGIN = 352319
+    MAX_RUNNUM = 400000
+
+    dirs_to_list = []
+    for u in unlisted_dirs:
+        if not u: continue
+        if not len(u)==9: continue
+
+        try:
+            run_number = int(u[3:])
+        except (ValueError, TypeError) as err:
+            print(f'{err.args[0]}')
+            run_number = 0
+
+        if RUN3_BEGIN < run_number < MAX_RUNNUM:
+            dirs_to_list.append(u)
+        
+    create_runlist_json(dirs_to_list, web_dir, use_proxy)
 
     # reset the last run time to now
     with open('last_run.json','w') as f:
@@ -85,6 +103,8 @@ def create_runlist_json(runs, web_dir, use_proxy):
             print(f'    Found existing summaries for datasets {list(exclude)}. Will not overwrite.')
         else:
             exclude = []
+
+        print(f'    excluding datasets {exclude}')
 
         cmd = f'{use_proxy} gfal-ls {web_dir}/results/{run}/'
         datasets = [d for d in subprocess.check_output(cmd,shell=True).decode('ascii').split('\n')[:-1] if d not in exclude and 'tar' not in d]
@@ -149,7 +169,7 @@ def create_runlist_json(runs, web_dir, use_proxy):
             updated_summary.update(existing_summary)
             updated_summary.update({dataset:summary})
 
-            run_list.update({run_number:{"datasets":updated_summary}})
+            run_list.update({run_number:{"directory":run_number, "datasets":updated_summary}})
 
         # dump runlist json
         with open('run_list.json','w') as f:
