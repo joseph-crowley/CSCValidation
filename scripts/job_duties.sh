@@ -34,6 +34,12 @@ cd RUNDIR
 # execute the validation
 cmsRun validation_cfg.py
 
+RUN_STATUS=$?
+if [ $RUN_STATUS -neq 0 ]
+then 
+  exit $RUN_STATUS
+fi
+
 # make the plots with the output
 #
 ##########################################################################################
