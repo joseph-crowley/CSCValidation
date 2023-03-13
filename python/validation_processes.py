@@ -115,6 +115,10 @@ def replace_template_parameters(basedir, input_files, dataset, globaltag, rundir
 
     local_run = local_run.replace('RUN_REPLACETAG', run)
     local_run = local_run.replace('STREAM_REPLACETAG', stream)
+    local_run = local_run.replace('CMSSWVERSION_REPLACETAG', os.getenv("CMSSW_VERSION"))
+    local_run = local_run.replace('SCRAMARCH_REPLACETAG', os.getenv("SCRAM_ARCH"))
+    local_run = local_run.replace('USER_REPLACETAG', os.getlogin())
+    local_run = local_run.replace('JOBTAG_REPLACETAG', jobtag)
 
     with open(rundir+'/local_run.sh','w') as f:
         f.write(local_run)
