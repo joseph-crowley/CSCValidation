@@ -63,6 +63,7 @@ def run_validation(config):
     os.system('ln -sf '+basedir+'/scripts/copyFromCondorToSite.sh {}/'.format(rundir))
     os.system('ln -sf '+basedir+'/RecoLocalMuon.tar {}/'.format(rundir))
     os.system('cp -f '+basedir+'/scripts/job_duties.sh {}/'.format(rundir))
+    os.system('cp -f '+basedir+'/scripts/local_run.sh {}/'.format(rundir))
 
     ## currently only support RAW eventContent
     #if eventContent != 'RAW':
@@ -92,7 +93,7 @@ def replace_template_parameters(basedir, input_files, dataset, globaltag, rundir
     with open(rundir+'/validation_cfg.py','w') as f:
         f.write(validation_cfg)
 
-    # replace template parameters in job.sub
+    # replace template parameters in job_duties.sh
     with open(basedir+'/scripts/job_duties.sh','r') as f:
         job_duties = f.read()
    
@@ -104,6 +105,19 @@ def replace_template_parameters(basedir, input_files, dataset, globaltag, rundir
 
     with open(rundir+'/job_duties.sh','w') as f:
         f.write(job_duties)
+
+    # replace template parameters in local_run.sh
+    with open(basedir+'/scripts/local_run.sh','r') as f:
+        local_run = f.read()
+   
+    # format the input files for the ESSource in the validation_cfg
+    input_files_str = "', '".join(input_files)
+
+    local_run = local_run.replace('RUN_REPLACETAG', run)
+    local_run = local_run.replace('STREAM_REPLACETAG', stream)
+
+    with open(rundir+'/local_run.sh','w') as f:
+        f.write(local_run)
 
     # replace template parameters in job.sub
     with open(basedir+'/scripts/job.sub','r') as f:
