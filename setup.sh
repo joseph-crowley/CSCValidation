@@ -12,8 +12,8 @@
 #   Joe Crowley, UC Santa Barbara
 ##########################################################################################
 
-CMSSWVERSION="CMSSW_12_4_9"
-DATASET="/Muon/Run2022E-v1/RAW"
+CMSSWVERSION="CMSSW_12_4_8"
+DATASET="/Muon/Run2022D-v1/RAW"
 GLOBALTAG="124X_dataRun3_Prompt_v4"
 
 INITIALDIR=$(pwd)
@@ -34,7 +34,12 @@ cd CSCValidation
 mv ../RecoLocalMuon.tar .
 
 # submit validation jobs
-python3 python/submit_validation_jobs.py $DATASET $GLOBALTAG
+if [ "$1" == "--local" ]; then
+    git checkout local_run
+    python3 python/submit_validation_jobs.py $DATASET $GLOBALTAG --dryRun
+else 
+    python3 python/submit_validation_jobs.py $DATASET $GLOBALTAG
+fi
 
 # build runlist
 export CSCVALDIR=$(pwd)
