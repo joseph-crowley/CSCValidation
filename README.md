@@ -11,6 +11,7 @@ source setup.sh --local
 you will be prompted for a GRID passphrase; this is the one for your voms proxy
 
 this will run the CSC validation process on a dataset specified in setup.sh.
+Note: for local runs, go to the $CMSSWVERSION/src/CSCValidation/outputs/tasks dir and choose a stream and run number. Run the job interactively using local_run.sh
 
 outputs are in $CMSSWVERSION/src/CSCValidation/outputs/
 plots are displayed at the [CSC validation website](https://cms-conddb.cern.ch/eosweb/csc/)
